@@ -4,7 +4,7 @@ import numpy as np
 import data_def as d3
 
 
-class PointXYZTestCase(unittest.TestCase):
+class Data3DTestCase(unittest.TestCase):
     POINTXYZ1 = (1.2, -10, 0)
     POINTXYZ2 = (2.5, 1, 0)
     POINTXYZ3 = (2.5, 0, 1.8)

@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Optional
 
 import numpy as np
 
@@ -81,10 +81,12 @@ class PointDAE():
 
 
 class PointsList():
-    """Keeps the points in list. Points cannot be removed.
+    """Keeps the unique points in list. Points cannot be removed.
     Points type is defined while initialization.
-    gives ID for each added Point
-    Points list may be expoorted to Numpy array"""
+    Gives ID for each added Point.
+    Points list may be exported to Numpy array.
+    """
+
     LISTTYPE = ['XYZ', 'DAE']
 
     def __init__(self, listType='XYZ'):  # XYZ or DAE
@@ -98,7 +100,6 @@ class PointsList():
 
     def add_point(self, pntData: object) -> int:
         # print(type(pntData), pntData) # debug
-
         if isinstance(pntData, PointXYZ) and not self.XYZtype:
             raise TypeError
         if isinstance(pntData, PointDAE) and not self.DAEtype:
@@ -117,7 +118,7 @@ class PointsList():
         # print(self.points) # debug
         return len(self.points) - 1
 
-    def get_point(self, i: int) -> tuple:
+    def get_point(self, i: int) -> Sequence[float]:
         if i >= len(self.points):
             raise IndexError
         val = self.points[i]
@@ -128,3 +129,85 @@ class PointsList():
 
     def np_array(self):
         return np.asfarray(self.points)
+
+
+class EdgeList():
+    """Keeps the unique edges list. Items cannot be removed.
+    Gives ID for each added Edge.
+    """
+
+    def __init__(self):
+        self.edges = []
+
+    def __len__(self):
+        return len(self.edges)
+
+    def add_edge(self, v1: int, v2: int) -> int:
+        if len(self.edges):
+            for i, val in enumerate(self.edges):
+                if val[0] == v1 and val[1] == v2:
+                    return i
+        self.edges.append([v1, v2])
+        return len(self.edges) - 1
+
+    def get_edge(self, i: int) -> Sequence[int]:
+        if i >= len(self.edges):
+            raise IndexError
+        val = self.edges[i]
+        return tuple(val)
+
+
+class Face():
+    """Keeps vertex list, edges list. May keep center point and normal vector"""
+
+    def __init__(self, vertexes: Optional[Sequence[int]], edges: Optional[Sequence[int]]):
+        self.vertexes = [int]
+        self.edges = [int]
+        if vertexes:
+            self.set_vertexes(vertexes)
+        if edges:
+            self.set_edges(edges)
+
+    def set_vertexes(self, vxs: Sequence[int]):
+        if isinstance(vxs, list):
+            a, b, c = tuple(vxs)
+        else:
+            a, b, c = vxs
+        self.vertexes = [a, b, c]
+
+    def set_edges(self, eds: Sequence[int]):
+        if isinstance(eds, list):
+            a, b, c = tuple(eds)
+        else:
+            a, b, c = eds
+        self.edges = [a, b, c]
+
+    def get_vertexes(self):
+        return tuple(self.vertexes)
+
+    def get_edges(self):
+        return tuple(self.edges)
+
+
+class FaceList():
+    """Keeps the unique Faces list. Items cannot be removed.
+    Gives ID for each added Face."""
+
+    def __init__(self):
+        self.faces = []
+
+    def __len__(self):
+        return len(self.faces)
+
+    def add_face(self, face: Face) -> int:
+        if len(self.faces):
+            for i, val in enumerate(self.faces):
+                if val == face:
+                    return i
+        self.faces.append(face)
+        return len(self.faces) - 1
+
+    def get_face(self, i: int) -> tuple:
+        if i >= len(self.faces):
+            raise IndexError
+        return self.faces[i]
