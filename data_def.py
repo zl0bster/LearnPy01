@@ -51,7 +51,6 @@ class PointXYZ():
         return False
 
 
-
 class PointDAE():
     # Distance, Azimuth, Elevation: float mm and radians
     def __init__(self, d: float, a: float, e: float):
@@ -79,3 +78,53 @@ class PointDAE():
         if self.d == other.d and self.a == other.a and self.e == other.e:
             return True
         return False
+
+
+class PointsList():
+    """Keeps the points in list. Points cannot be removed.
+    Points type is defined while initialization.
+    gives ID for each added Point
+    Points list may be expoorted to Numpy array"""
+    LISTTYPE = ['XYZ', 'DAE']
+
+    def __init__(self, listType='XYZ'):  # XYZ or DAE
+        self.XYZtype = False
+        self.DAEtype = False
+        if listType == self.LISTTYPE[0]:
+            self.XYZtype = True
+        if listType == self.LISTTYPE[1]:
+            self.DAEtype = True
+        self.points = []
+
+    def add_point(self, pntData: object) -> int:
+        # print(type(pntData), pntData) # debug
+
+        if isinstance(pntData, PointXYZ) and not self.XYZtype:
+            raise TypeError
+        if isinstance(pntData, PointDAE) and not self.DAEtype:
+            raise TypeError
+        if isinstance(pntData, tuple):
+            a, b, c = pntData
+        elif isinstance(pntData, list):
+            a, b, c = tuple(pntData)
+        else:
+            a, b, c = pntData.get()
+        if len(self.points):
+            for i, val in enumerate(self.points):
+                if val[0] == a and val[1] == b and val[2] == c:
+                    return i
+        self.points.append([a, b, c])
+        # print(self.points) # debug
+        return len(self.points) - 1
+
+    def get_point(self, i: int) -> tuple:
+        if i >= len(self.points):
+            raise IndexError
+        val = self.points[i]
+        return tuple(val)
+
+    def __len__(self):
+        return len(self.points)
+
+    def np_array(self):
+        return np.asfarray(self.points)
