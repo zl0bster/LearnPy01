@@ -211,3 +211,72 @@ class FaceList():
         if i >= len(self.faces):
             raise IndexError
         return self.faces[i]
+
+
+class BodyFaces():
+    """Keeps center coords, orientation.
+    Contains VartexList, EdgesList, FacesList
+
+    """
+
+    def __init__(self):
+        self.centerXYZ = PointXYZ(0, 0, 0)
+        self.normalDAE = PointDAE(1, 0, 0)
+        self.vertexes = PointsList(listType="XYZ")
+        self.edges = EdgeList()
+        self.faces = FaceList()
+
+    def add_face(self, facePoints: Sequence[Sequence[float]]):
+        vertexes = []
+        edges = []
+        for point in facePoints:
+            vertexes.append(self.vertexes.add_point(point))
+        for i, vx in enumerate(vertexes):
+            a = vx
+            if i == len(vertexes) - 1:
+                b = vertexes[0]
+            else:
+                b = vertexes[i + 1]
+            edges.append(self.edges.add_edge(a, b))
+        if len(vertexes) > 3:
+            raise OverflowError
+        currFace = Face(vertexes=vertexes, edges=edges)
+        self.faces.add_face(currFace)
+
+    def __len__(self):
+        return len(self.faces)
+
+    def __iter__(self):
+        self.nIterFace = 0
+        return self
+
+    def __next__(self):
+        if self.nIterFace == len(self.faces):
+            raise StopIteration
+        yield self.faces.get_face(self.nIterFace)
+        self.nIterFace += 1
+
+    def get_vxs_np_array(self):
+        return self.vertexes.np_array()
+
+    def get_centerXYZ(self) -> Sequence[float]:
+        return self.centerXYZ.get()
+
+    def set_centerXYZ(self, pointXYZ: Sequence[float]):
+        if isinstance(pointXYZ, tuple):
+            self.centerXYZ.set(pointXYZ)
+        elif isinstance(pointXYZ, list):
+            self.centerXYZ.set(tuple(pointXYZ))
+        else:
+            raise TypeError
+
+    def get_normal(self) -> Sequence[float]:
+        return self.normalDAE.get()
+
+    def set_normal(self, pointDAE: Sequence[float]):
+        if isinstance(pointDAE, tuple):
+            self.normalDAE.set(pointDAE)
+        elif isinstance(pointDAE, list):
+            self.normalDAE.set(tuple(pointDAE))
+        else:
+            raise TypeError
