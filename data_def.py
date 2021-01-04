@@ -246,15 +246,15 @@ class BodyFaces():
     def __len__(self):
         return len(self.faces)
 
-    def __iter__(self):
-        self.nIterFace = 0
-        return self
-
-    def __next__(self):
-        if self.nIterFace == len(self.faces):
-            raise StopIteration
-        self.nIterFace += 1
-        return self.faces.get_face(self.nIterFace)
+    # def __iter__(self):
+    #     self.nIterFace = 0
+    #     return self
+    #
+    # def __next__(self):
+    #     if self.nIterFace == len(self.faces):
+    #         raise StopIteration
+    #     self.nIterFace += 1
+    #     return self.faces.get_face(self.nIterFace)
 
     def get_vxs_np_array(self):
         return self.vertexes.np_array()
