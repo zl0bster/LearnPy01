@@ -253,8 +253,8 @@ class BodyFaces():
     def __next__(self):
         if self.nIterFace == len(self.faces):
             raise StopIteration
-        yield self.faces.get_face(self.nIterFace)
         self.nIterFace += 1
+        return self.faces.get_face(self.nIterFace)
 
     def get_vxs_np_array(self):
         return self.vertexes.np_array()
@@ -280,3 +280,37 @@ class BodyFaces():
             self.normalDAE.set(tuple(pointDAE))
         else:
             raise TypeError
+
+    def get_all_edges(self):
+        edgeList = []
+        for i in range(len(self.edges)):
+            edgeList.append(self.edges.get_edge(i))
+        return edgeList
+
+    def get_edges_list(self):
+        faceList = []
+        for i in range(len(self.faces)):
+            face = self.faces.get_face(i)
+            faceEdges = face.get_edges()
+            faceList.append(faceEdges)
+        return faceList
+
+    def get_vertex_list(self):
+        faceList = []
+        for i in range(len(self.faces)):
+            face = self.faces.get_face(i)
+            faceVXs = face.get_vertexes()
+            faceList.append(faceVXs)
+        return faceList
+
+    def get_face_vertexes(self, i: int) -> Sequence[int]:
+        if i >= len(self.faces):
+            raise IndexError
+        face = self.faces.get_face(i)
+        return face.get_vertexes()
+
+    def get_face_edges(self, i: int) -> Sequence[int]:
+        if i >= len(self.faces):
+            raise IndexError
+        face = self.faces.get_face(i)
+        return face.get_edges()

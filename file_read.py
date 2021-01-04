@@ -41,7 +41,7 @@ class stl_reader():
                 self.stlFile.close()
                 raise StopIteration
             if line.count(self.VXPREFIX):
-                print(line)
+                # print(line)
                 faceVXlist.append(str_2_XYZ(line))
                 continue
             if line.count(self.FACEBEGIN):
@@ -49,7 +49,7 @@ class stl_reader():
                 continue
             if line.count(self.FACEEND):
                 self.nFaces += 1
-                print(self.nFaces)
+                # print(self.nFaces)
                 return faceVXlist
 
 
