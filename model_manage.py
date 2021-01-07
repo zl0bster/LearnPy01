@@ -85,7 +85,7 @@ def model_create(name: str) -> dd.BodyFaces:
     :returns model data structure"""
 
     body = dd.BodyFaces()
-    sourceFile = fr.stl_reader(filename=name)
+    sourceFile = fr.stl_reader_2(filename=name)
     faces = iter(sourceFile)
     for faceVXses in faces:
         body.add_face(facePoints=faceVXses)

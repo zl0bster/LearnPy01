@@ -12,7 +12,7 @@ def str_2_XYZ(line: str) -> Sequence[float]:
     return tuple(coords)
 
 
-class stl_reader():
+class stl_reader_2():
     FACEBEGIN = 'outer loop'
     FACEEND = 'endloop'
     VXPREFIX = 'vertex'
@@ -52,6 +52,46 @@ class stl_reader():
                 # print(self.nFaces)
                 return faceVXlist
 
+class stl_reader_1():
+    FACEBEGIN = 'outer loop'
+    FACEEND = 'endloop'
+    VXPREFIX = 'vertex'
+    ENDSOLID = 'endsolid'
+
+    def __init__(self, filename: str):
+        if isfile(filename):
+            self.filename = filename
+            print(f'file {filename} is found')
+        else:
+            raise FileExistsError
+
+    def __iter__(self):
+        # self.stlFile = open(self.filename, 'r', encoding='UTF-8')
+        with open(self.filename, 'r', encoding='UTF-8') as stlFile:
+            self.filetext = stlFile.readlines()
+        # solidName = self.filetext
+        # self.bodyName = solidName[6:]
+        self.nFaces = 0
+        return self
+
+    def __next__(self):
+        faceVXlist = []
+        for line in self.filetext:
+            line = line.strip()
+            if not line:
+                raise StopIteration
+            if line.count(self.VXPREFIX):
+                # print(line)
+                faceVXlist.append(str_2_XYZ(line))
+                continue
+            if line.count(self.FACEBEGIN):
+                faceVXlist = []
+                continue
+            if line.count(self.FACEEND):
+                self.nFaces += 1
+                # print(self.nFaces)
+                return faceVXlist
+
 
 def test_read(name: str):
     stl = open(name, encoding='utf-8')
@@ -71,7 +111,7 @@ if __name__ == '__main__':
 
     stlFile = 'LK1-002.01c.STL'
 
-    reader = stl_reader(filename=stlFile)
+    reader = stl_reader_2(filename=stlFile)
     it = iter(reader)
     # print(reader)
     for vxcoords in it:
