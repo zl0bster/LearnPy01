@@ -1,3 +1,4 @@
+import pickle
 from os.path import isfile
 from typing import Sequence
 
@@ -52,6 +53,7 @@ class stl_reader_2():
                 # print(self.nFaces)
                 return faceVXlist
 
+
 class stl_reader_1():
     FACEBEGIN = 'outer loop'
     FACEEND = 'endloop'
@@ -98,6 +100,19 @@ def test_read(name: str):
     for line in stl.readlines():
         print(line)
 
+
+def pickleWrite(fileName: str, a: object):
+    if isfile(fileName):
+        print(f"File \"{fileName}\" already exists. \nIt will be overwritten")
+    with open(file=fileName, mode='wb') as f:
+        pickle.dump(a, f)
+
+def pickleRead(fileName: str) -> object:
+    if not isfile(fileName):
+        print(f"File {fileName} not found")
+        raise FileExistsError
+    with open(file=fileName, mode='rb') as f:
+        return pickle.load(f)
 
 if __name__ == '__main__':
     # line1 = 'vertex 0.000000e+000 4.600000e+001 0.000000e+000'

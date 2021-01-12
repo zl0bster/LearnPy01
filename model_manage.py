@@ -1,5 +1,4 @@
 import argparse
-from typing import Sequence
 
 import numpy as np
 import simple_draw as sd
@@ -24,19 +23,27 @@ def main():
     sd.resolution = (xResolution, yResolution)
     xCenter = xResolution / 2
     yCenter = yResolution / 2
-    stlFile = args.file.name  # 'LK1-002.01c.STL'
-    model = model_create(stlFile)
+    stlFile: str = args.file.name  # 'LK1-002.01c.STL'
+    fileType = stlFile[-3:].upper()
+    print(stlFile, fileType)
+    if fileType == 'PKL':
+        model = fr.pickleRead(stlFile)
+    else:
+        picklFile = stlFile + '.pkl'
+        # print(stlFile, picklFile, fileType)
+        model = model_create(stlFile)
+        fr.pickleWrite(picklFile, model)
     vertex = model.get_vxs_np_array()
-    bodyCenter = vm.focuse_point_count(vertex)
+    bodyCenter = vm.body_center_count(vertex)
     print(bodyCenter)
     vxsXYZcentered = vm.array_plus_point(pts=vertex,
-                                      pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
+                                         pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
     vxsDAEbodyCenter = vm.arrayXYZtoDAE(vxsXYZcentered)
     deltaA = 00  # degrees
     deltaE = 00  # degrees
     scale = 10
     currentBodyVxsDAE = vm.array_plus_point(pts=vxsDAEbodyCenter,
-                                         pt=(0, np.radians(deltaA), np.radians(deltaE)))
+                                            pt=(0, np.radians(deltaA), np.radians(deltaE)))
     currentBodyVxsDAE = vxsDAEbodyCenter
     screenProjectionVXsXYZ = np.round(vm.arrayDAEtoXYZ(currentBodyVxsDAE))
     # screenProjectionVXsXYZ = vertex
@@ -44,7 +51,7 @@ def main():
     print(envBox)
     screenProjectionVXsXYZ = np.multiply(screenProjectionVXsXYZ, scale)
     screenProjectionVXsXYZ = vm.array_plus_point(pts=screenProjectionVXsXYZ,
-                                              pt=(xCenter, yCenter, 0))
+                                                 pt=(xCenter, yCenter, 0))
     envBox = vm.envelope_box_count(screenProjectionVXsXYZ)
     print(envBox)
     sd._init()
@@ -86,12 +93,11 @@ def model_create(name: str) -> dd.BodyFaces:
     :returns model data structure"""
 
     body = dd.BodyFaces()
-    sourceFile = fr.stl_reader_2(filename=name)
+    sourceFile = fr.stl_reader_1(filename=name)
     faces = iter(sourceFile)
     for faceVXses in faces:
         body.add_face(facePoints=faceVXses)
     return body
-
 
 
 if __name__ == '__main__':

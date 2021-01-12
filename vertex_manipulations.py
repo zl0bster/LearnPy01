@@ -2,13 +2,13 @@ from typing import Sequence
 
 import numpy as np
 
-import data_def as dd
 X = 0
 Y = 1
 Z = 2
 R = 0
 A = 1
 E = 2
+
 
 def envelope_box_count(points):  # np vertex array
     """Finds max and min coords in all axes to count envelope"""
@@ -21,7 +21,7 @@ def envelope_box_count(points):  # np vertex array
     return xmin, ymin, zmin, xmax, ymax, zmax
 
 
-def focuse_point_count(points):  # np vertex array
+def body_center_count(points):  # np vertex array
     """Counts center coord of envelope"""
     xmin, ymin, zmin, xmax, ymax, zmax = envelope_box_count(points)
     xmin = abs(xmin) if xmin < 0 else -xmin
@@ -76,3 +76,12 @@ def array_plus_point(pts, pt: Sequence[float]):  # np vertex array in XYZ or DAE
         result[i, Y] = pts[i, Y] + pt[Y]
         result[i, Z] = pts[i, Z] + pt[Z]
     return result
+
+
+def quadrantXYZ(pnt1: Sequence[float]) -> int:
+    """Returns space quadrant number
+    1 - X>0 Y>0 Z>0
+    ...
+    8 - X<0 Y<0 Z<0
+    """
+    ...
