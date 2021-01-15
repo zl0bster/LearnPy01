@@ -13,7 +13,7 @@ Z = 2
 R = 0
 A = 1
 E = 2
-
+Q = 3
 
 def main():
     parser = parserDefinition()
@@ -44,7 +44,7 @@ def main():
     scale = 10
     currentBodyVxsDAE = vm.array_plus_point(pts=vxsDAEbodyCenter,
                                             pt=(0, np.radians(deltaA), np.radians(deltaE)))
-    currentBodyVxsDAE = vxsDAEbodyCenter
+    # currentBodyVxsDAE = vxsDAEbodyCenter
     screenProjectionVXsXYZ = np.round(vm.arrayDAEtoXYZ(currentBodyVxsDAE))
     # screenProjectionVXsXYZ = vertex
     envBox = vm.envelope_box_count(screenProjectionVXsXYZ)
@@ -93,7 +93,7 @@ def model_create(name: str) -> dd.BodyFaces:
     :returns model data structure"""
 
     body = dd.BodyFaces()
-    sourceFile = fr.stl_reader_1(filename=name)
+    sourceFile = fr.stl_reader_2(filename=name)
     faces = iter(sourceFile)
     for faceVXses in faces:
         body.add_face(facePoints=faceVXses)
