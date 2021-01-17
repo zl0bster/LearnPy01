@@ -36,30 +36,30 @@ def body_center_count(points):  # np vertex array
 
 def arrayXYZtoDAE(pts):  # np vertex array in XYZ
     """Transforms decart coordinates array to angular"""
-    arShape = [pts.shape[0], 4]
+    # arShape = [pts.shape[0], 4]
+    arShape = pts.shape
     result = np.zeros(arShape)
     for i in range(pts.shape[0]):
         if pts[i].any() == 0:
             continue
-        currentPt = pts[i].tolist()
-        aCorrection = 0
-        q = quadrantXYZ(currentPt)
-        if q == 6 or q == 8:
-            aCorrection = -np.pi / 2
-        elif q == 2 or q == 4:
-            aCorrection = np.pi / 2
+        # currentPt = pts[i].tolist()
+        # q = quadrantXYZ(currentPt)
         result[i, R] = np.sqrt(np.power(pts[i, X], 2) + np.power(pts[i, Y], 2) + np.power(pts[i, Z], 2))
         result[i, E] = np.arcsin(pts[i, Z] / result[i, R])
         lenXY = np.hypot(pts[i, X], pts[i, Y])
         if not lenXY == 0:
-            result[i, A] = np.arcsin(pts[i, Y] / lenXY) + aCorrection
-        result[i, Q] = q
+            if pts[i, X] < 0:
+                result[i, A] = np.pi - np.arcsin(pts[i, Y] / lenXY)
+            else:
+                result[i, A] = np.arcsin(pts[i, Y] / lenXY)
+        # result[i, Q] = q
     return result
 
 
 def arrayDAEtoXYZ(pts):  # np vertex array in DAE
     """Transforms angular coordinates array to decart"""
-    arShape = [pts.shape[0], 3]
+    # arShape = [pts.shape[0], 3]
+    arShape = pts.shape
     result = np.zeros(arShape)
     for i in range(pts.shape[0]):
         if pts[i].any() == 0:
@@ -67,6 +67,27 @@ def arrayDAEtoXYZ(pts):  # np vertex array in DAE
         result[i, X] = pts[i, R] * np.cos(pts[i, E]) * np.cos(pts[i, A])
         result[i, Y] = pts[i, R] * np.cos(pts[i, E]) * np.sin(pts[i, A])
         result[i, Z] = pts[i, R] * np.sin(pts[i, E])
+        if np.abs(result[i, X]) < 1.0e-12:
+            result[i, X] = 0
+        if np.abs(result[i, Y]) < 1.0e-12:
+            result[i, Y] = 0
+    return result
+
+
+def arrayDAEturn(pts, a: float, e: float):
+    result = np.zeros(pts.shape)
+    for i in range(pts.shape[0]):
+        result[i, R] = pts[i, R]
+        result[i, A] = pts[i, A] + a
+        result[i, E] = pts[i, E] + e
+        if result[i, A] > np.pi:
+            result[i, A] = -2 * np.pi + result[i, A]
+        if result[i, A] < -np.pi:
+            result[i, A] = 2 * np.pi - result[i, A]
+        if result[i, E] > np.pi:
+            result[i, E] = -2 * np.pi + result[i, E]
+        if result[i, E] < -np.pi:
+            result[i, E] = 2 * np.pi - result[i, E]
     return result
 
 

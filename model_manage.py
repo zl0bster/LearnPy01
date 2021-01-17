@@ -15,6 +15,7 @@ A = 1
 E = 2
 Q = 3
 
+
 def main():
     parser = parserDefinition()
     args = parser.parse_args()
@@ -40,10 +41,10 @@ def main():
                                          pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
     vxsDAEbodyCenter = vm.arrayXYZtoDAE(vxsXYZcentered)
     deltaA = 00  # degrees
-    deltaE = 00  # degrees
+    deltaE = 40  # degrees
     scale = 10
-    currentBodyVxsDAE = vm.array_plus_point(pts=vxsDAEbodyCenter,
-                                            pt=(0, np.radians(deltaA), np.radians(deltaE)))
+    currentBodyVxsDAE = vm.arrayDAEturn(pts=vxsDAEbodyCenter,
+                                        a=np.radians(deltaA), e=np.radians(deltaE))
     # currentBodyVxsDAE = vxsDAEbodyCenter
     screenProjectionVXsXYZ = np.round(vm.arrayDAEtoXYZ(currentBodyVxsDAE))
     # screenProjectionVXsXYZ = vertex
