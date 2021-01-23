@@ -73,21 +73,22 @@ def arrayDAEtoXYZ(pts):  # np vertex array in DAE
             result[i, Y] = 0
     return result
 
+def shift2pi_correction(angle:float)->float:
+    result = angle
+    if angle > np.pi:
+        result = -2 * np.pi + angle
+    if angle < -np.pi:
+        result = 2 * np.pi + angle
+    return result
 
 def arrayDAEturn(pts, a: float, e: float):
     result = np.zeros(pts.shape)
     for i in range(pts.shape[0]):
         result[i, R] = pts[i, R]
         result[i, A] = pts[i, A] + a
-        result[i, E] = pts[i, E] + e
-        if result[i, A] > np.pi:
-            result[i, A] = -2 * np.pi + result[i, A]
-        if result[i, A] < -np.pi:
-            result[i, A] = 2 * np.pi - result[i, A]
-        if result[i, E] > np.pi:
-            result[i, E] = -2 * np.pi + result[i, E]
-        if result[i, E] < -np.pi:
-            result[i, E] = 2 * np.pi - result[i, E]
+        result[i, E] = pts[i, E] #+ e
+        result[i, A] = shift2pi_correction(result[i, A])
+        result[i, E] = shift2pi_correction(result[i, E])
     return result
 
 

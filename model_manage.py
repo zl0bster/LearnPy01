@@ -1,6 +1,8 @@
 import argparse
+import sys
 
 import numpy as np
+import pygame as pg
 import simple_draw as sd
 
 import data_def as dd
@@ -17,6 +19,70 @@ Q = 3
 
 
 def main():
+    scale = 10
+
+    def turn_model(a: int = 0, e: int = 0):  # azimuth and elevation angles are in degrees
+        bodyOrientation = list(model.get_normal())
+        print('*' * 20)
+        print(bodyOrientation)
+        print(a, e)
+        if a:
+            bodyOrientation[A] += np.radians(a)
+            if bodyOrientation[A] > np.pi:
+                bodyOrientation[A] = -2 * np.pi + bodyOrientation[A]
+            if bodyOrientation[A] < -np.pi:
+                bodyOrientation[A] = 2 * np.pi + bodyOrientation[A]
+        if e:
+            bodyOrientation[E] += np.radians(e)
+            if bodyOrientation[E] > np.pi:
+                bodyOrientation[E] = -2 * np.pi + bodyOrientation[E]
+            if bodyOrientation[E] < -np.pi:
+                bodyOrientation[E] = 2 * np.pi + bodyOrientation[E]
+        # print(bodyOrientation)
+        model.set_normal(tuple(bodyOrientation))
+
+    def rescale(z: float = 1.0):
+        model.set_scale(z * model.get_scale())
+
+    def read_button():
+        keyTable = {"UP": [pg.K_UP, turn_model, {'e': 10}],
+                    "DN": [pg.K_DOWN, turn_model, {'e': -10}],
+                    "LT": [pg.K_LEFT, turn_model, {'a': 10}],
+                    "RT": [pg.K_RIGHT, turn_model, {'a': -10}],
+                    "ZI": [pg.K_LSHIFT, rescale, {'z': 1.1}],
+                    "ZO": [pg.K_LCTRL, rescale, {'z': 0.9}],
+                    }
+        while True:
+            if sd.user_want_exit():
+                sd.quit()
+            for evnt in pg.event.get():
+                if evnt.type == pg.QUIT:
+                    # sd.quit()
+                    sys.exit()
+                elif evnt.type == pg.KEYDOWN:
+                    for keyAction in keyTable.values():
+                        checkKey = keyAction[0]
+                        keyFx = keyAction[1]
+                        fxArgs = keyAction[2]
+                        if evnt.key == checkKey:
+                            # print(keyAction)
+                            # print(checkKey, keyFx, fxArgs)
+                            keyFx(**fxArgs)
+                            return
+
+    def calc_model_pos():
+        orientation = list(model.get_normal())
+        a = orientation[A]
+        e = orientation[E]
+        currentBodyVxsDAE = vm.arrayDAEturn(pts=vxsDAEbodyCenter, a=a, e=e)
+        screenProjectionVXsXYZ = np.round(vm.arrayDAEtoXYZ(currentBodyVxsDAE))
+        print("=" * 20)
+        print(orientation)
+        screenProjectionVXsXYZ = np.multiply(screenProjectionVXsXYZ, model.get_scale())
+        screenProjectionVXsXYZ = vm.array_plus_point(pts=screenProjectionVXsXYZ,
+                                                     pt=(xCenter, yCenter, 0))
+        return screenProjectionVXsXYZ
+
     parser = parserDefinition()
     args = parser.parse_args()
     xResolution = args.xres
@@ -31,7 +97,6 @@ def main():
         model = fr.pickleRead(stlFile)
     else:
         picklFile = stlFile + '.pkl'
-        # print(stlFile, picklFile, fileType)
         model = model_create(stlFile)
         fr.pickleWrite(picklFile, model)
     vertex = model.get_vxs_np_array()
@@ -40,26 +105,12 @@ def main():
     vxsXYZcentered = vm.array_plus_point(pts=vertex,
                                          pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
     vxsDAEbodyCenter = vm.arrayXYZtoDAE(vxsXYZcentered)
-    deltaA = 00  # degrees
-    deltaE = 40  # degrees
-    scale = 10
-    currentBodyVxsDAE = vm.arrayDAEturn(pts=vxsDAEbodyCenter,
-                                        a=np.radians(deltaA), e=np.radians(deltaE))
-    # currentBodyVxsDAE = vxsDAEbodyCenter
-    screenProjectionVXsXYZ = np.round(vm.arrayDAEtoXYZ(currentBodyVxsDAE))
-    # screenProjectionVXsXYZ = vertex
-    envBox = vm.envelope_box_count(screenProjectionVXsXYZ)
-    print(envBox)
-    screenProjectionVXsXYZ = np.multiply(screenProjectionVXsXYZ, scale)
-    screenProjectionVXsXYZ = vm.array_plus_point(pts=screenProjectionVXsXYZ,
-                                                 pt=(xCenter, yCenter, 0))
-    envBox = vm.envelope_box_count(screenProjectionVXsXYZ)
-    print(envBox)
+    model.set_scale(10)
     sd._init()
-    draw_model_1(model=model, screenVXs=screenProjectionVXsXYZ)
+    sd.take_background()
     while not sd.user_want_exit():
-        continue
-    sd.quit()
+        draw_model_1(model=model, screenVXs=calc_model_pos())
+        read_button()
 
 
 def parserDefinition():
@@ -82,6 +133,7 @@ def parserDefinition():
 def draw_model_1(model: dd.BodyFaces, screenVXs):
     edgesList = model.get_all_edges()
     sd.start_drawing()  # removes  blinking
+    sd.draw_background()
     for edge in edgesList:
         pt1 = sd.get_point(screenVXs[edge[0], X], screenVXs[edge[0], Y])
         pt2 = sd.get_point(screenVXs[edge[1], X], screenVXs[edge[1], Y])
@@ -126,4 +178,5 @@ if __name__ == '__main__':
     # vxDAE = arrayXYZtoDAE(vertex)
     # # print(np.subtract(vertex, arrayDAEtoXYZ(vxDAE)))
     # print(array_plus_point(pts=vertex, pt=(10, -10, 10)))
+    # read_button()
     main()

@@ -225,6 +225,7 @@ class BodyFaces():
         self.vertexes = PointsList(listType="XYZ")
         self.edges = EdgeList()
         self.faces = FaceList()
+        self.scale: float = 1.0
 
     def add_face(self, facePoints: Sequence[Sequence[float]]):
         vertexes = []
@@ -275,11 +276,19 @@ class BodyFaces():
 
     def set_normal(self, pointDAE: Sequence[float]):
         if isinstance(pointDAE, tuple):
-            self.normalDAE.set(pointDAE)
+            d, a, e = pointDAE
+            self.normalDAE.set(d=d, a=a, e=e)
         elif isinstance(pointDAE, list):
-            self.normalDAE.set(tuple(pointDAE))
+            d, a, e = tuple(pointDAE)
+            self.normalDAE.set(d=d, a=a, e=e)
         else:
             raise TypeError
+
+    def get_scale(self):
+        return self.scale
+
+    def set_scale(self, s: float):
+        self.scale = s
 
     def get_all_edges(self):
         edgeList = []
