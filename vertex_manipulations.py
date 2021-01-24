@@ -73,7 +73,8 @@ def arrayDAEtoXYZ(pts):  # np vertex array in DAE
             result[i, Y] = 0
     return result
 
-def shift2pi_correction(angle:float)->float:
+
+def shift2pi_correction(angle: float) -> float:
     result = angle
     if angle > np.pi:
         result = -2 * np.pi + angle
@@ -81,14 +82,48 @@ def shift2pi_correction(angle:float)->float:
         result = 2 * np.pi + angle
     return result
 
+
 def arrayDAEturn(pts, a: float, e: float):
     result = np.zeros(pts.shape)
     for i in range(pts.shape[0]):
         result[i, R] = pts[i, R]
         result[i, A] = pts[i, A] + a
-        result[i, E] = pts[i, E] #+ e
+        result[i, E] = pts[i, E]  # + e
         result[i, A] = shift2pi_correction(result[i, A])
         result[i, E] = shift2pi_correction(result[i, E])
+    return result
+
+
+def arrayXYZrotX(pts, a: float):
+    result = np.zeros(pts.shape)
+    cosA = np.cos(a)
+    sinA = np.sin(a)
+    for i in range(pts.shape[0]):
+        result[i, X] = pts[i, X]
+        result[i, Y] = pts[i, Y] * cosA + pts[i, Z] * (-sinA)
+        result[i, Z] = pts[i, Y] * sinA + pts[i, Z] * cosA
+    return result
+
+
+def arrayXYZrotY(pts, a: float):
+    result = np.zeros(pts.shape)
+    cosA = np.cos(a)
+    sinA = np.sin(a)
+    for i in range(pts.shape[0]):
+        result[i, Y] = pts[i, Y]
+        result[i, X] = pts[i, X] * cosA + pts[i, Z] * sinA
+        result[i, Z] = pts[i, X] * (-sinA) + pts[i, Z] * cosA
+    return result
+
+
+def arrayXYZrotZ(pts, a: float):
+    result = np.zeros(pts.shape)
+    cosA = np.cos(a)
+    sinA = np.sin(a)
+    for i in range(pts.shape[0]):
+        result[i, Z] = pts[i, Z]
+        result[i, X] = pts[i, X] * cosA + pts[i, Y] * (-sinA)
+        result[i, Y] = pts[i, X] * sinA + pts[i, Y] * cosA
     return result
 
 

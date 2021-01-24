@@ -19,36 +19,50 @@ Q = 3
 
 
 def main():
-    scale = 10
 
-    def turn_model(a: int = 0, e: int = 0):  # azimuth and elevation angles are in degrees
+    def turn_model(ax: int = 0, ay: int = 0, az: int = 0, ):
         bodyOrientation = list(model.get_normal())
-        print('*' * 20)
-        print(bodyOrientation)
-        print(a, e)
-        if a:
-            bodyOrientation[A] += np.radians(a)
-            if bodyOrientation[A] > np.pi:
-                bodyOrientation[A] = -2 * np.pi + bodyOrientation[A]
-            if bodyOrientation[A] < -np.pi:
-                bodyOrientation[A] = 2 * np.pi + bodyOrientation[A]
-        if e:
-            bodyOrientation[E] += np.radians(e)
-            if bodyOrientation[E] > np.pi:
-                bodyOrientation[E] = -2 * np.pi + bodyOrientation[E]
-            if bodyOrientation[E] < -np.pi:
-                bodyOrientation[E] = 2 * np.pi + bodyOrientation[E]
-        # print(bodyOrientation)
+        if ax:
+            bodyOrientation[X] += np.radians(ax)
+            bodyOrientation[X] = vm.shift2pi_correction(bodyOrientation[X])
+        if ay:
+            bodyOrientation[Y] += np.radians(ay)
+            bodyOrientation[Y] = vm.shift2pi_correction(bodyOrientation[Y])
+        if az:
+            bodyOrientation[Z] += np.radians(az)
+            bodyOrientation[Z] = vm.shift2pi_correction(bodyOrientation[Z])
         model.set_normal(tuple(bodyOrientation))
+
+    # def turn_model_1(a: int = 0, e: int = 0):  # azimuth and elevation angles are in degrees
+    #     bodyOrientation = list(model.get_normal())
+    #     print('*' * 20)
+    #     print(bodyOrientation)
+    #     print(a, e)
+    #     if a:
+    #         bodyOrientation[A] += np.radians(a)
+    #         if bodyOrientation[A] > np.pi:
+    #             bodyOrientation[A] = -2 * np.pi + bodyOrientation[A]
+    #         if bodyOrientation[A] < -np.pi:
+    #             bodyOrientation[A] = 2 * np.pi + bodyOrientation[A]
+    #     if e:
+    #         bodyOrientation[E] += np.radians(e)
+    #         if bodyOrientation[E] > np.pi:
+    #             bodyOrientation[E] = -2 * np.pi + bodyOrientation[E]
+    #         if bodyOrientation[E] < -np.pi:
+    #             bodyOrientation[E] = 2 * np.pi + bodyOrientation[E]
+    #     # print(bodyOrientation)
+    #     model.set_normal(tuple(bodyOrientation))
 
     def rescale(z: float = 1.0):
         model.set_scale(z * model.get_scale())
 
     def read_button():
-        keyTable = {"UP": [pg.K_UP, turn_model, {'e': 10}],
-                    "DN": [pg.K_DOWN, turn_model, {'e': -10}],
-                    "LT": [pg.K_LEFT, turn_model, {'a': 10}],
-                    "RT": [pg.K_RIGHT, turn_model, {'a': -10}],
+        keyTable = {"UP": [pg.K_UP, turn_model, {'ax': 10}],
+                    "DN": [pg.K_DOWN, turn_model, {'ax': -10}],
+                    "LT": [pg.K_LEFT, turn_model, {'ay': 10}],
+                    "RT": [pg.K_RIGHT, turn_model, {'ay': -10}],
+                    "CW": [pg.K_PAGEUP, turn_model, {'az': 10}],
+                    "СС": [pg.K_PAGEDOWN, turn_model, {'az': -10}],
                     "ZI": [pg.K_LSHIFT, rescale, {'z': 1.1}],
                     "ZO": [pg.K_LCTRL, rescale, {'z': 0.9}],
                     }
@@ -65,23 +79,22 @@ def main():
                         keyFx = keyAction[1]
                         fxArgs = keyAction[2]
                         if evnt.key == checkKey:
-                            # print(keyAction)
-                            # print(checkKey, keyFx, fxArgs)
                             keyFx(**fxArgs)
                             return
 
     def calc_model_pos():
         orientation = list(model.get_normal())
-        a = orientation[A]
-        e = orientation[E]
-        currentBodyVxsDAE = vm.arrayDAEturn(pts=vxsDAEbodyCenter, a=a, e=e)
-        screenProjectionVXsXYZ = np.round(vm.arrayDAEtoXYZ(currentBodyVxsDAE))
-        print("=" * 20)
-        print(orientation)
-        screenProjectionVXsXYZ = np.multiply(screenProjectionVXsXYZ, model.get_scale())
-        screenProjectionVXsXYZ = vm.array_plus_point(pts=screenProjectionVXsXYZ,
-                                                     pt=(xCenter, yCenter, 0))
-        return screenProjectionVXsXYZ
+        ax = orientation[X]
+        ay = orientation[Y]
+        az = orientation[Z]
+        currentBodyVxsXYZ = np.multiply(vxsXYZcentered, model.get_scale())
+        currentBodyVxsXYZ = vm.arrayXYZrotX(pts=currentBodyVxsXYZ, a=ax)
+        currentBodyVxsXYZ = vm.arrayXYZrotY(pts=currentBodyVxsXYZ, a=ay)
+        currentBodyVxsXYZ = vm.arrayXYZrotZ(pts=currentBodyVxsXYZ, a=az)
+        currentBodyVxsXYZ = vm.array_plus_point(pts=currentBodyVxsXYZ,
+                                                pt=(xCenter, yCenter, 0))
+        return currentBodyVxsXYZ
+
 
     parser = parserDefinition()
     args = parser.parse_args()
@@ -104,8 +117,8 @@ def main():
     print(bodyCenter)
     vxsXYZcentered = vm.array_plus_point(pts=vertex,
                                          pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
-    vxsDAEbodyCenter = vm.arrayXYZtoDAE(vxsXYZcentered)
     model.set_scale(10)
+    model.set_normal((0, 0, 0))
     sd._init()
     sd.take_background()
     while not sd.user_want_exit():
