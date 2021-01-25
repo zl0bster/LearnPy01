@@ -19,7 +19,6 @@ Q = 3
 
 
 def main():
-
     def turn_model(ax: int = 0, ay: int = 0, az: int = 0, ):
         bodyOrientation = list(model.get_normal())
         if ax:
@@ -95,6 +94,25 @@ def main():
                                                 pt=(xCenter, yCenter, 0))
         return currentBodyVxsXYZ
 
+    def print_data():
+        f1 = pg.font.Font(None, 18)
+        txtpos = (10, 20)
+        orientation = model.get_normal()
+        lines = [f'Model: {stlFile}',
+                 f'Surfaces: {len(model)}',
+                 "",
+                 "Use arrow keys and PG_UP/PG_DN to turn model",
+                 "Left SHIFT/CTRL to zoom in/out",
+                 "",
+                 f'Scale: {int(model.get_scale())}',
+                 f'X angle:{int(np.degrees(orientation[X]))}',
+                 f'Y angle:{int(np.degrees(orientation[Y]))}',
+                 f'Z angle:{int(np.degrees(orientation[Z]))}'
+                 ]
+        for i, line in enumerate(lines):
+            text1 = f1.render(line, True, sd.COLOR_DARK_YELLOW)
+            sc.blit(text1, (txtpos[0], txtpos[1]+20*i))
+        pg.display.update()
 
     parser = parserDefinition()
     args = parser.parse_args()
@@ -120,9 +138,13 @@ def main():
     model.set_scale(10)
     model.set_normal((0, 0, 0))
     sd._init()
+    pg.font.init()
+    sc = pg.display.set_mode((xResolution, yResolution))
+    sc.fill(sd.COLOR_DARK_BLUE)
     sd.take_background()
     while not sd.user_want_exit():
         draw_model_1(model=model, screenVXs=calc_model_pos())
+        print_data()
         read_button()
 
 
