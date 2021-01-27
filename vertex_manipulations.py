@@ -1,3 +1,7 @@
+""" Module contains math 3D operations with vertex numpy array
+
+"""
+
 from typing import Sequence
 
 import numpy as np
@@ -11,7 +15,7 @@ E = 2
 Q = 3
 
 
-def envelope_box_count(points):  # np vertex array
+def envelope_box_count(points: np.array) -> Sequence[float]:  # np vertex array
     """Finds max and min coords in all axes to count envelope"""
     xmax = np.max(points[:, 0])
     ymax = np.max(points[:, 1])
@@ -22,7 +26,7 @@ def envelope_box_count(points):  # np vertex array
     return xmin, ymin, zmin, xmax, ymax, zmax
 
 
-def body_center_count(points):  # np vertex array
+def body_center_count(points: np.array) -> Sequence[float]:  # np vertex array
     """Counts center coord of envelope"""
     xmin, ymin, zmin, xmax, ymax, zmax = envelope_box_count(points)
     xmin = abs(xmin) if xmin < 0 else -xmin
@@ -34,7 +38,7 @@ def body_center_count(points):  # np vertex array
     return x, y, z
 
 
-def arrayXYZtoDAE(pts):  # np vertex array in XYZ
+def arrayXYZtoDAE(pts: np.array) -> np.array:  # np vertex array in XYZ
     """Transforms decart coordinates array to angular"""
     # arShape = [pts.shape[0], 4]
     arShape = pts.shape
@@ -56,7 +60,7 @@ def arrayXYZtoDAE(pts):  # np vertex array in XYZ
     return result
 
 
-def arrayDAEtoXYZ(pts):  # np vertex array in DAE
+def arrayDAEtoXYZ(pts: np.array) -> np.array:  # np vertex array in DAE
     """Transforms angular coordinates array to decart"""
     # arShape = [pts.shape[0], 3]
     arShape = pts.shape
@@ -75,6 +79,7 @@ def arrayDAEtoXYZ(pts):  # np vertex array in DAE
 
 
 def shift2pi_correction(angle: float) -> float:
+    '''corrects angle in radians when it is more than 180 degrees'''
     result = angle
     if angle > np.pi:
         result = -2 * np.pi + angle
@@ -83,7 +88,8 @@ def shift2pi_correction(angle: float) -> float:
     return result
 
 
-def arrayDAEturn(pts, a: float, e: float):
+def arrayDAEturn(pts: np.array, a: float, e: float) -> np.array:
+    '''Turn all array points in spherical implemention'''
     result = np.zeros(pts.shape)
     for i in range(pts.shape[0]):
         result[i, R] = pts[i, R]
@@ -94,7 +100,8 @@ def arrayDAEturn(pts, a: float, e: float):
     return result
 
 
-def arrayXYZrotX(pts, a: float):
+def arrayXYZrotX(pts: np.array, a: float) -> np.array:
+    ''' Turn all points od pts-array around X axis for a-radians'''
     result = np.zeros(pts.shape)
     cosA = np.cos(a)
     sinA = np.sin(a)
@@ -105,7 +112,8 @@ def arrayXYZrotX(pts, a: float):
     return result
 
 
-def arrayXYZrotY(pts, a: float):
+def arrayXYZrotY(pts: np.array, a: float) -> np.array:
+    ''' Turn all points od pts-array around Y axis for a-radians'''
     result = np.zeros(pts.shape)
     cosA = np.cos(a)
     sinA = np.sin(a)
@@ -116,7 +124,8 @@ def arrayXYZrotY(pts, a: float):
     return result
 
 
-def arrayXYZrotZ(pts, a: float):
+def arrayXYZrotZ(pts: np.array, a: float) -> np.array:
+    ''' Turn all points od pts-array around Z axis for a-radians'''
     result = np.zeros(pts.shape)
     cosA = np.cos(a)
     sinA = np.sin(a)
@@ -128,14 +137,15 @@ def arrayXYZrotZ(pts, a: float):
 
 
 def pointsXYZdelta(pnt1: Sequence[float], pnt2: Sequence[float]) -> Sequence[float]:
+    '''Counts relative distance between points '''
     x = pnt2[X] - pnt1[X]
     y = pnt2[Y] - pnt1[Y]
     z = pnt2[Z] - pnt1[Z]
     return x, y, z
 
 
-def array_plus_point(pts, pt: Sequence[float]):  # np vertex array in XYZ or DAE
-    """Transforms decart coordinates array to angular"""
+def array_plus_point(pts: np.array, pt: Sequence[float]) -> np.array:  # np vertex array in XYZ or DAE
+    """ADDs point's XYZ to each line of array"""
     result = np.zeros(pts.shape)
     for i in range(pts.shape[0]):
         result[i, X] = pts[i, X] + pt[X]
@@ -144,7 +154,7 @@ def array_plus_point(pts, pt: Sequence[float]):  # np vertex array in XYZ or DAE
     return result
 
 
-def arrayDAEtoDEG(pts):  # np vertex array in DAE
+def arrayDAEtoDEG(pts: np.array) -> np.array:  # np vertex array in DAE
     """Transforms angular values from radians to degrees"""
     result = np.zeros(pts.shape)
     for i in range(pts.shape[0]):
