@@ -170,17 +170,19 @@ class Face():
 
     def set_vertexes(self, vxs: Sequence[int]):
         if isinstance(vxs, list):
-            a, b, c = tuple(vxs)
+            self.vertexes = vxs
+        elif isinstance(vxs, tuple):
+            self.vertexes = list(*vxs)
         else:
-            a, b, c = vxs
-        self.vertexes = [a, b, c]
+            raise TypeError
 
     def set_edges(self, eds: Sequence[int]):
         if isinstance(eds, list):
-            a, b, c = tuple(eds)
+            self.edges = eds
+        elif isinstance(eds, tuple):
+            self.edges = list(*eds)
         else:
-            a, b, c = eds
-        self.edges = [a, b, c]
+            raise TypeError
 
     def get_vertexes(self):
         return tuple(self.vertexes)
