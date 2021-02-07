@@ -156,6 +156,13 @@ class EdgeList():
         val = self.edges[i]
         return tuple(val)
 
+    def __getitem__(self, item: int) -> Sequence[int]:
+        if not isinstance(item, int):
+            raise TypeError(f"{item} - wrong index type")
+        if 0 <= item < len(self.edges):
+            raise IndexError
+        return tuple(self.edges[item])
+
 
 class Face():
     """Keeps vertex list, edges list. May keep center point and normal vector"""
@@ -296,6 +303,8 @@ class BodyFaces():
         edgeList = []
         for i in range(len(self.edges)):
             edgeList.append(self.edges.get_edge(i))
+        # for edge in self.edges:
+        #     edgeList.append(edge)
         return edgeList
 
     def get_edges_list(self):

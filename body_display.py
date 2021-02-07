@@ -20,6 +20,7 @@ class DisplayModel:
     def __init__(self, modelData: dd.BodyFaces):
         self.model = modelData
         self.displayMode = DispModes.wireFrame
+        self.edgesList = self.model.get_all_edges()
         # TODO initialize surface analize
 
     def set_display_mode(self, mode: DispModes):
@@ -34,7 +35,11 @@ class DisplayModel:
         ...
 
     class Surfaces:
-
+        """should define attributes if surface:
+        belongs to any sort of special kind (flat or cilinder) and to which face it belongs
+        orientation - +Z or -Z
+        which simple surface are its neighbours
+        """
         def __init__(self):
             #TODO get surfaces data from model
             self.facesNormals = self.__faces_normal_count()
