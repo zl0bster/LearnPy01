@@ -167,7 +167,7 @@ def parserDefinition():
     return parser
 
 
-def draw_model_1(model: dd.BodyFaces, screenVXs):
+def draw_model_1(model: bd.DisplayModel, screenVXs):
     edgesList = model.get_edges()
     sd.start_drawing()  # removes  blinking
     sd.draw_background()

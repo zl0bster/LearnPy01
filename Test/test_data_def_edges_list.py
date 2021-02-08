@@ -17,9 +17,11 @@ class MyTestCase(unittest.TestCase):
         for edge in fullList:
             el.add_edge(v1=edge[0], v2=edge[1])
         print('+ ' * 10)
-        for edge in el:
-            print(edge)
+        # for edge in el:
+        #     print(edge)
         uniqueList = el.get_unique()
+        print(el.colinears)
+        print(el.edges)
         print(uniqueList)
         print(uniqueList == edgeList)
         self.assertEqual(uniqueList, edgeList)

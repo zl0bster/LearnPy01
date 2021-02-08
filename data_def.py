@@ -138,7 +138,7 @@ class EdgeList():
 
     def __init__(self):
         self.edges: list = []
-        self.colinears: dict = {}
+        self.colinears: list = []
 
     def __len__(self):
         return len(self.edges)
@@ -164,7 +164,7 @@ class EdgeList():
             return tuple(self.edges[item])
         raise IndexError
 
-    def __find_collinears(self):
+    def find_collinears(self):
         # if len(self.colinears) != 0:
         if self.colinears:
             return
@@ -176,19 +176,22 @@ class EdgeList():
                     continue
                 comparedEdge = self.edges[j]
                 isCollinear = (workEdge[0] == comparedEdge[1]) and (
-                        workEdge[1] == comparedEdge[0]
-                )
+                        workEdge[1] == comparedEdge[0])
                 if isCollinear or comparedEdge == workEdge:
                     result.append(j)
-            self.colinears[i] = result
+            self.colinears.append(result)
 
     def get_unique(self) -> Sequence[int]:
         # if len(self.colinears) == 0:
         if not self.colinears:
-            self.__find_collinears()
+            self.find_collinears()
         result = []
-        for i in range(len(self.edges)):
-            if i < self.colinears[i][0]:
+        for i in range(len(self.colinears)):
+            colinearEdgeNumber=self.colinears[i]
+            print(i, colinearEdgeNumber)
+            if len(colinearEdgeNumber)==0:
+                result.append(self.get_edge(i))
+            elif i < colinearEdgeNumber[0]:
                 result.append(self.get_edge(i))
         return result
 
@@ -336,6 +339,9 @@ class BodyFaces():
         #     edgeList.append(edge)
         return edgeList
 
+    def get_unique_edges(self):
+        return self.edges.get_unique()
+
     def get_edges_list_by_vx(self):
         faceList = []
         for i in range(len(self.faces)):
@@ -363,6 +369,3 @@ class BodyFaces():
             raise IndexError
         face = self.faces.get_face(i)
         return face.get_edges()
-
-    def get_unique_edges(self):
-        return self.edges.get_unique()
