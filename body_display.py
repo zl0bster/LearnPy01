@@ -20,7 +20,7 @@ class DisplayModel:
     def __init__(self, modelData: dd.BodyFaces):
         self.model = modelData
         self.displayMode = DispModes.wireFrame
-        self.edgesList = self.model.get_all_edges()
+        self.edgesList1 = self.model.get_unique_edges()
         # TODO initialize surface analize
 
     def set_display_mode(self, mode: DispModes):
@@ -28,7 +28,7 @@ class DisplayModel:
 
     def get_edges(self) -> Sequence[int]:
         """returns list of edges to display"""
-        ...
+        return self.edgesList1
 
     def get_surfaces(self) -> Sequence[int]:
         """returns list of surfaces to display"""

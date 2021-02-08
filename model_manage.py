@@ -8,6 +8,7 @@ import simple_draw as sd
 import data_def as dd
 import file_read as fr
 import vertex_manipulations as vm
+import body_display as bd
 
 X = 0
 Y = 1
@@ -142,8 +143,9 @@ def main():
     sc = pg.display.set_mode((xResolution, yResolution))
     sc.fill(sd.COLOR_DARK_BLUE)
     sd.take_background()
+    displayModel = bd.DisplayModel(modelData=model)
     while not sd.user_want_exit():
-        draw_model_1(model=model, screenVXs=calc_model_pos())
+        draw_model_1(model=displayModel, screenVXs=calc_model_pos())
         print_data()
         read_button()
 
@@ -165,8 +167,8 @@ def parserDefinition():
     return parser
 
 
-def draw_model_1(model: dd.BodyFaces, screenVXs):
-    edgesList = model.get_all_edges()
+def draw_model_1(model: bd.DisplayModel, screenVXs):
+    edgesList = model.get_edges()
     sd.start_drawing()  # removes  blinking
     sd.draw_background()
     for edge in edgesList:
