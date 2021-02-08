@@ -10,6 +10,11 @@ import numpy as np
     surface body"""
 
 
+def progress_show(line: str):
+    backward = '\r'
+    print(backward, line, end='')
+
+
 class PointXYZ():
     # x, y, z: float mm
     def __init__(self, x: float, y: float, z: float):
@@ -114,6 +119,7 @@ class PointsList():
             for i, val in enumerate(self.points):
                 if val[0] == a and val[1] == b and val[2] == c:
                     return i
+        progress_show(f'check added point  {len(self.points)}       ')
         self.points.append([a, b, c])
         # print(self.points) # debug
         return len(self.points) - 1
@@ -139,16 +145,18 @@ class EdgeList():
     def __init__(self):
         self.edges: list = []
         self.colinears: list = []
+        self.ownerSurface = []
 
     def __len__(self):
         return len(self.edges)
 
-    def add_edge(self, v1: int, v2: int) -> int:
+    def add_edge(self, v1: int, v2: int, s: Optional[int] = None) -> int:
         if len(self.edges):
             for i, val in enumerate(self.edges):
                 if val[0] == v1 and val[1] == v2:
                     return i
         self.edges.append([v1, v2])
+        self.ownerSurface.append(s)
         return len(self.edges) - 1
 
     def get_edge(self, i: int) -> Sequence[int]:
@@ -169,6 +177,7 @@ class EdgeList():
         if self.colinears:
             return
         for i in range(len(self.edges)):
+            progress_show(f'find colinears for {i}\t edge of {len(self.edges)}    ')
             workEdge = self.edges[i]
             result = []
             for j in range(len(self.edges)):
@@ -187,9 +196,8 @@ class EdgeList():
             self.find_collinears()
         result = []
         for i in range(len(self.colinears)):
-            colinearEdgeNumber=self.colinears[i]
-            print(i, colinearEdgeNumber)
-            if len(colinearEdgeNumber)==0:
+            colinearEdgeNumber = self.colinears[i]
+            if len(colinearEdgeNumber) == 0:
                 result.append(self.get_edge(i))
             elif i < colinearEdgeNumber[0]:
                 result.append(self.get_edge(i))
@@ -271,6 +279,7 @@ class BodyFaces():
     def add_face(self, facePoints: Sequence[Sequence[float]]):
         vertexes = []
         edges = []
+        currentFaceId = len(self.faces)
         for point in facePoints:
             vertexes.append(self.vertexes.add_point(point))
         for i, vx in enumerate(vertexes):
@@ -279,7 +288,7 @@ class BodyFaces():
                 b = vertexes[0]
             else:
                 b = vertexes[i + 1]
-            edges.append(self.edges.add_edge(a, b))
+            edges.append(self.edges.add_edge(a, b, currentFaceId))
         if len(vertexes) > 3:
             raise OverflowError
         currFace = Face(vertexes=vertexes, edges=edges)
