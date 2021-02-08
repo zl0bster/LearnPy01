@@ -36,5 +36,7 @@ class Data3DTestCase(unittest.TestCase):
         print(self.NPPOINTS)
         self.assertEqual(np.array_equal(pl.np_array(), self.NPPOINTS), True)
 
-if __name__ == '__main__':
-    unittest.main()
+
+
+    if __name__ == '__main__':
+        unittest.main()

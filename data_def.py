@@ -137,7 +137,8 @@ class EdgeList():
     """
 
     def __init__(self):
-        self.edges = []
+        self.edges: list = []
+        self.colinears: dict = {}
 
     def __len__(self):
         return len(self.edges)
@@ -160,8 +161,36 @@ class EdgeList():
         if not isinstance(item, int):
             raise TypeError(f"{item} - wrong index type")
         if 0 <= item < len(self.edges):
-            raise IndexError
-        return tuple(self.edges[item])
+            return tuple(self.edges[item])
+        raise IndexError
+
+    def __find_collinears(self):
+        # if len(self.colinears) != 0:
+        if self.colinears:
+            return
+        for i in range(len(self.edges)):
+            workEdge = self.edges[i]
+            result = []
+            for j in range(len(self.edges)):
+                if i == j:
+                    continue
+                comparedEdge = self.edges[j]
+                isCollinear = (workEdge[0] == comparedEdge[1]) and (
+                        workEdge[1] == comparedEdge[0]
+                )
+                if isCollinear or comparedEdge == workEdge:
+                    result.append(j)
+            self.colinears[i] = result
+
+    def get_unique(self) -> Sequence[int]:
+        # if len(self.colinears) == 0:
+        if not self.colinears:
+            self.__find_collinears()
+        result = []
+        for i in range(len(self.edges)):
+            if i < self.colinears[i][0]:
+                result.append(self.get_edge(i))
+        return result
 
 
 class Face():
@@ -307,7 +336,7 @@ class BodyFaces():
         #     edgeList.append(edge)
         return edgeList
 
-    def get_edges_list(self):
+    def get_edges_list_by_vx(self):
         faceList = []
         for i in range(len(self.faces)):
             face = self.faces.get_face(i)
@@ -334,3 +363,6 @@ class BodyFaces():
             raise IndexError
         face = self.faces.get_face(i)
         return face.get_edges()
+
+    def get_unique_edges(self):
+        return self.edges.get_unique()
