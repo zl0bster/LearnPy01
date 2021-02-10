@@ -127,9 +127,13 @@ def main():
     print(stlFile, fileType)
     if fileType == 'PKL':
         model = fr.pickleRead(stlFile)
+        savePKL = False
     else:
         picklFile = stlFile + '.pkl'
         model = model_create(stlFile)
+        savePKL = True
+    displayModel = bd.DisplayModel(modelData=model)
+    if savePKL:
         fr.pickleWrite(picklFile, model)
     vertex = model.get_vxs_np_array()
     bodyCenter = vm.body_center_count(vertex)
@@ -143,7 +147,6 @@ def main():
     sc = pg.display.set_mode((xResolution, yResolution))
     sc.fill(sd.COLOR_DARK_BLUE)
     sd.take_background()
-    displayModel = bd.DisplayModel(modelData=model)
     while not sd.user_want_exit():
         draw_model_1(model=displayModel, screenVXs=calc_model_pos())
         print_data()

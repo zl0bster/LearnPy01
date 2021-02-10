@@ -165,6 +165,18 @@ class EdgeList():
         val = self.edges[i]
         return tuple(val)
 
+    def get_edges_surf(self, i: int) -> Sequence[int]:
+        if i >= len(self.edges):
+            raise IndexError
+        val = self.ownerSurface[i]
+        return val
+
+    def get_edge_colinear(self, i: int) -> Sequence[int]:
+        if i >= len(self.edges):
+            raise IndexError
+        val = self.colinears[i]
+        return val
+
     def __getitem__(self, item: int) -> Sequence[int]:
         if not isinstance(item, int):
             raise TypeError(f"{item} - wrong index type")
