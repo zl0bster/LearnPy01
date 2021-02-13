@@ -309,6 +309,11 @@ class BodyFaces():
     def __len__(self):
         return len(self.faces)
 
+    def __getitem__(self, item: int):
+        if item < 0 or item >= len(self):
+            raise IndexError
+        return self.faces[item]
+
     # def __iter__(self):
     #     self.nIterFace = 0
     #     return self

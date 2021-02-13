@@ -5,10 +5,10 @@ import numpy as np
 import pygame as pg
 import simple_draw as sd
 
+import body_display as bd
 import data_def as dd
 import file_read as fr
 import vertex_manipulations as vm
-import body_display as bd
 
 X = 0
 Y = 1
@@ -82,18 +82,18 @@ def main():
                             keyFx(**fxArgs)
                             return
 
-    def calc_model_pos():
-        orientation = list(model.get_normal())
-        ax = orientation[X]
-        ay = orientation[Y]
-        az = orientation[Z]
-        currentBodyVxsXYZ = np.multiply(vxsXYZcentered, model.get_scale())
-        currentBodyVxsXYZ = vm.arrayXYZrotX(pts=currentBodyVxsXYZ, a=ax)
-        currentBodyVxsXYZ = vm.arrayXYZrotY(pts=currentBodyVxsXYZ, a=ay)
-        currentBodyVxsXYZ = vm.arrayXYZrotZ(pts=currentBodyVxsXYZ, a=az)
-        currentBodyVxsXYZ = vm.array_plus_point(pts=currentBodyVxsXYZ,
-                                                pt=(xCenter, yCenter, 0))
-        return currentBodyVxsXYZ
+    # def calc_model_pos():
+    #     orientation = list(model.get_normal())
+    #     ax = orientation[X]
+    #     ay = orientation[Y]
+    #     az = orientation[Z]
+    #     currentBodyVxsXYZ = np.multiply(vxsXYZcentered, model.get_scale())
+    #     currentBodyVxsXYZ = vm.arrayXYZrotX(pts=currentBodyVxsXYZ, a=ax)
+    #     currentBodyVxsXYZ = vm.arrayXYZrotY(pts=currentBodyVxsXYZ, a=ay)
+    #     currentBodyVxsXYZ = vm.arrayXYZrotZ(pts=currentBodyVxsXYZ, a=az)
+    #     currentBodyVxsXYZ = vm.array_plus_point(pts=currentBodyVxsXYZ,
+    #                                             pt=(xCenter, yCenter, 0))
+    #     return currentBodyVxsXYZ
 
     def print_data():
         f1 = pg.font.Font(None, 18)
@@ -112,7 +112,7 @@ def main():
                  ]
         for i, line in enumerate(lines):
             text1 = f1.render(line, True, sd.COLOR_DARK_YELLOW)
-            sc.blit(text1, (txtpos[0], txtpos[1]+20*i))
+            sc.blit(text1, (txtpos[0], txtpos[1] + 20 * i))
         pg.display.update()
 
     parser = parserDefinition()
@@ -132,23 +132,25 @@ def main():
         picklFile = stlFile + '.pkl'
         model = model_create(stlFile)
         savePKL = True
-    displayModel = bd.DisplayModel(modelData=model)
+    displayModel = bd.DisplayModel(modelData=model, screen=[xResolution, yResolution])
     if savePKL:
         fr.pickleWrite(picklFile, model)
-    vertex = model.get_vxs_np_array()
-    bodyCenter = vm.body_center_count(vertex)
-    print(bodyCenter)
-    vxsXYZcentered = vm.array_plus_point(pts=vertex,
-                                         pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
-    model.set_scale(10)
-    model.set_normal((0, 0, 0))
+    # vertex = model.get_vxs_np_array()
+    # bodyCenter = vm.body_center_count(vertex)
+    # print(bodyCenter)
+    # vxsXYZcentered = vm.array_plus_point(pts=vertex,
+    #                                      pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
+    # model.set_scale(10)
+    # model.set_normal((0, 0, 0))
     sd._init()
     pg.font.init()
     sc = pg.display.set_mode((xResolution, yResolution))
     sc.fill(sd.COLOR_DARK_BLUE)
-    sd.take_background()
+    # sd.take_background()
+    displayModel.set_screen(screen=sc)
     while not sd.user_want_exit():
-        draw_model_1(model=displayModel, screenVXs=calc_model_pos())
+        # draw_model_1(model=displayModel, screenVXs=calc_model_pos())
+        displayModel.draw_body()
         print_data()
         read_button()
 
@@ -170,15 +172,15 @@ def parserDefinition():
     return parser
 
 
-def draw_model_1(model: bd.DisplayModel, screenVXs):
-    edgesList = model.get_edges()
-    sd.start_drawing()  # removes  blinking
-    sd.draw_background()
-    for edge in edgesList:
-        pt1 = sd.get_point(screenVXs[edge[0], X], screenVXs[edge[0], Y])
-        pt2 = sd.get_point(screenVXs[edge[1], X], screenVXs[edge[1], Y])
-        sd.line(pt1, pt2)
-    sd.finish_drawing()  # removes  blinking
+# def draw_model_1(model: bd.DisplayModel, screenVXs):
+#     edgesList = model.get_edges()
+#     sd.start_drawing()  # removes  blinking
+#     sd.draw_background()
+#     for edge in edgesList:
+#         pt1 = sd.get_point(screenVXs[edge[0], X], screenVXs[edge[0], Y])
+#         pt2 = sd.get_point(screenVXs[edge[1], X], screenVXs[edge[1], Y])
+#         sd.line(pt1, pt2)
+#     sd.finish_drawing()  # removes  blinking
 
 
 def model_create(name: str) -> dd.BodyFaces:

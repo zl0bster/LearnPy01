@@ -214,3 +214,4 @@ def count_norm_to_surf(vxs: np.array) -> Sequence[float]:
         val = vxs[0, i] * minorVal
         result.append(val)
     return result
+
