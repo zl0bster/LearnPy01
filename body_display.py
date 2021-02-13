@@ -50,6 +50,7 @@ class DisplayModel:
 
     def set_display_mode(self, mode: DispModes):
         self.displayMode = mode
+
     def set_screen(self, screen: pg.display):
         self.screen = screen
         sd.take_background()
@@ -61,6 +62,7 @@ class DisplayModel:
     def get_surfaces(self) -> Sequence[int]:
         """returns list of surfaces to display"""
         ...
+
     def draw_body(self):
         self._calc_current_model_pos()
         edgesList = self.get_edges()
@@ -87,27 +89,30 @@ class DisplayModel:
                                                 pt=(xCenter, yCenter, 0))
         self.countVXCoords = currentBodyVxsXYZ
 
-    def _count_fs_normals(self):
+    def _count_fcs_normals(self):
+        result = []
         for face in self.model:
             vxsList = face.get_vertexes()
             vxcMatrix = vm.make_surf_MX_from_VX_array(pts=self.countVXCoords, vxs=vxsList)
+            result.append(vm.count_norm_to_surf(vxcMatrix))
+        return result
 
 
-class Surfaces:
-    """should define attributes if surface:
-    belongs to any sort of special kind (flat or cilinder) and to which face it belongs
-    orientation - +Z or -Z
-    which simple surface are its neighbours
-    """
+    class Surfaces:
+        """should define attributes if surface:
+        belongs to any sort of special kind (flat or cilinder) and to which face it belongs
+        orientation - +Z or -Z
+        which simple surface are its neighbours
+        """
 
-    def __init__(self):
-        # TODO get surfaces data from model
-        self.facesNormals = self.__faces_normal_count()
-        # TODO form flat surfaces on triangles
-        ...
+        def __init__(self):
+            # TODO get surfaces data from model
+            self.facesNormals = self._count_fcs_normals()
+            # TODO form flat surfaces on triangles
+            ...
 
-    def __faces_normal_count(self) -> np.array:
-        ...
+        def __faces_normal_count(self) -> np.array:
+            ...
 
 
 class Edges():

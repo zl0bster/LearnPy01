@@ -33,25 +33,6 @@ def main():
             bodyOrientation[Z] = vm.shift2pi_correction(bodyOrientation[Z])
         model.set_normal(tuple(bodyOrientation))
 
-    # def turn_model_1(a: int = 0, e: int = 0):  # azimuth and elevation angles are in degrees
-    #     bodyOrientation = list(model.get_normal())
-    #     print('*' * 20)
-    #     print(bodyOrientation)
-    #     print(a, e)
-    #     if a:
-    #         bodyOrientation[A] += np.radians(a)
-    #         if bodyOrientation[A] > np.pi:
-    #             bodyOrientation[A] = -2 * np.pi + bodyOrientation[A]
-    #         if bodyOrientation[A] < -np.pi:
-    #             bodyOrientation[A] = 2 * np.pi + bodyOrientation[A]
-    #     if e:
-    #         bodyOrientation[E] += np.radians(e)
-    #         if bodyOrientation[E] > np.pi:
-    #             bodyOrientation[E] = -2 * np.pi + bodyOrientation[E]
-    #         if bodyOrientation[E] < -np.pi:
-    #             bodyOrientation[E] = 2 * np.pi + bodyOrientation[E]
-    #     # print(bodyOrientation)
-    #     model.set_normal(tuple(bodyOrientation))
 
     def rescale(z: float = 1.0):
         model.set_scale(z * model.get_scale())
@@ -82,18 +63,6 @@ def main():
                             keyFx(**fxArgs)
                             return
 
-    # def calc_model_pos():
-    #     orientation = list(model.get_normal())
-    #     ax = orientation[X]
-    #     ay = orientation[Y]
-    #     az = orientation[Z]
-    #     currentBodyVxsXYZ = np.multiply(vxsXYZcentered, model.get_scale())
-    #     currentBodyVxsXYZ = vm.arrayXYZrotX(pts=currentBodyVxsXYZ, a=ax)
-    #     currentBodyVxsXYZ = vm.arrayXYZrotY(pts=currentBodyVxsXYZ, a=ay)
-    #     currentBodyVxsXYZ = vm.arrayXYZrotZ(pts=currentBodyVxsXYZ, a=az)
-    #     currentBodyVxsXYZ = vm.array_plus_point(pts=currentBodyVxsXYZ,
-    #                                             pt=(xCenter, yCenter, 0))
-    #     return currentBodyVxsXYZ
 
     def print_data():
         f1 = pg.font.Font(None, 18)
@@ -120,8 +89,6 @@ def main():
     xResolution = args.xres
     yResolution = args.yres
     sd.resolution = (xResolution, yResolution)
-    xCenter = xResolution / 2
-    yCenter = yResolution / 2
     stlFile: str = args.file.name  # 'LK1-002.01c.STL'
     fileType = stlFile[-3:].upper()
     print(stlFile, fileType)
@@ -135,21 +102,12 @@ def main():
     displayModel = bd.DisplayModel(modelData=model, screen=[xResolution, yResolution])
     if savePKL:
         fr.pickleWrite(picklFile, model)
-    # vertex = model.get_vxs_np_array()
-    # bodyCenter = vm.body_center_count(vertex)
-    # print(bodyCenter)
-    # vxsXYZcentered = vm.array_plus_point(pts=vertex,
-    #                                      pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
-    # model.set_scale(10)
-    # model.set_normal((0, 0, 0))
     sd._init()
     pg.font.init()
     sc = pg.display.set_mode((xResolution, yResolution))
     sc.fill(sd.COLOR_DARK_BLUE)
-    # sd.take_background()
     displayModel.set_screen(screen=sc)
     while not sd.user_want_exit():
-        # draw_model_1(model=displayModel, screenVXs=calc_model_pos())
         displayModel.draw_body()
         print_data()
         read_button()
@@ -172,17 +130,6 @@ def parserDefinition():
     return parser
 
 
-# def draw_model_1(model: bd.DisplayModel, screenVXs):
-#     edgesList = model.get_edges()
-#     sd.start_drawing()  # removes  blinking
-#     sd.draw_background()
-#     for edge in edgesList:
-#         pt1 = sd.get_point(screenVXs[edge[0], X], screenVXs[edge[0], Y])
-#         pt2 = sd.get_point(screenVXs[edge[1], X], screenVXs[edge[1], Y])
-#         sd.line(pt1, pt2)
-#     sd.finish_drawing()  # removes  blinking
-
-
 def model_create(name: str) -> dd.BodyFaces:
     """Reads STL model data and creates data structures.
     :returns model data structure"""
@@ -196,29 +143,4 @@ def model_create(name: str) -> dd.BodyFaces:
 
 
 if __name__ == '__main__':
-    # stlFile = 'LK1-002.01c.STL'
-    # model = model_create(stlFile)
-    # vertex = model.get_vxs_np_array()
-    # print(len(model))
-    # print(model.get_vxs_np_array())
-    # print(model.get_all_edges())
-    # print(model.get_edges_list())
-    # print(model.get_vertex_list())
-    # print(model.get_centerXYZ())
-    # for i in range(len(model)):
-    #     print(i)
-    #     print(model.get_face_edges(i))
-    #     print(model.get_face_vertexes(i))
-    # print(vertex)
-    # print(envelope_box_count(vertex))
-    # print((focuse_point_count(vertex)))
-
-    # print(vertex.shape[0])
-    # print(vertex.size)
-    # for i in range(vertex.shape[0]):
-    #     print(vertex[i])
-    # vxDAE = arrayXYZtoDAE(vertex)
-    # # print(np.subtract(vertex, arrayDAEtoXYZ(vxDAE)))
-    # print(array_plus_point(pts=vertex, pt=(10, -10, 10)))
-    # read_button()
     main()
