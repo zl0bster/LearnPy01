@@ -273,6 +273,11 @@ class FaceList():
             raise IndexError
         return self.faces[i]
 
+    def __getitem__(self, item: int):
+        if item >= len(self.faces) or item < 0:
+            raise IndexError
+        return self.faces[item]
+
 
 class BodyFaces():
     """Keeps center coords, orientation.
@@ -364,6 +369,12 @@ class BodyFaces():
         # for edge in self.edges:
         #     edgeList.append(edge)
         return edgeList
+    def get_all_faces(self):
+        faceList=[]
+        for face in self.faces:
+            faceList.append(face)
+        # return self.faces
+        return faceList
 
     def get_unique_edges(self):
         return self.edges.get_unique()

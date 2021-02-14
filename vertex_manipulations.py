@@ -196,6 +196,7 @@ def make_surf_MX_from_VX_array(vxs: np.array, pts: Sequence[int]) -> np.array:
     """creates surface matrix for normal count"""
     result = []
     for ind in pts:
+        print(pts, ind)
         result.append(list(vxs[ind]))
     return np.array(result)
 

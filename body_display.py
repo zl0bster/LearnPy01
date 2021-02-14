@@ -46,6 +46,8 @@ class DisplayModel:
         self.model.set_scale(10)
         self.model.set_normal((0, 0, 0))
         self.screen = None
+        print(self.model.get_all_faces())
+        self.currentFCsNormal = self._count_fcs_normals(faces=self.model.get_all_faces())
         # TODO initialize surface analize
 
     def set_display_mode(self, mode: DispModes):
@@ -89,13 +91,13 @@ class DisplayModel:
                                                 pt=(xCenter, yCenter, 0))
         self.countVXCoords = currentBodyVxsXYZ
 
-    def _count_fcs_normals(self):
+    def _count_fcs_normals(self, faces: Sequence[dd.Face]):
         result = []
-        for face in self.model:
+        for face in faces:
             vxsList = face.get_vertexes()
             vxcMatrix = vm.make_surf_MX_from_VX_array(pts=self.countVXCoords, vxs=vxsList)
             result.append(vm.count_norm_to_surf(vxcMatrix))
-        return result
+        return np.array(result)
 
 
     class Surfaces:
