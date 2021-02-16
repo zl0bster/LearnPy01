@@ -195,9 +195,9 @@ def quadrantDAE(pnt1: Sequence[float]) -> int:
 def make_surf_MX_from_VX_array(vxs: np.array, pts: Sequence[int]) -> np.array:
     """creates surface matrix for normal count"""
     result = []
-    print(pts)
+    # print("make surface from these points",vxs)
     for ind in pts:
-        print(ind)
+        # print(ind, '-', vxs[ind])
         result.append(list(vxs[ind]))
     return np.array(result)
 
@@ -206,15 +206,25 @@ def count_norm_to_surf(vxs: np.array) -> Sequence[float]:
     """creates minor matrixes and counts their determinants"""
     result = []
     minorIndxs = [[1, 2, 1], [0, 2, -1], [0, 1, 1]]
-    print('* ' * 10)
-    print(minorIndxs)
+    # print('* ' * 10)
+    # print(vxs)
     for i in range(3):
         minor = np.zeros([2, 2])
         minor[0, 0] = vxs[1, minorIndxs[i][0]]
         minor[0, 1] = vxs[1, minorIndxs[i][1]]
-        minor[1, 0] = vxs[1, minorIndxs[i][0]]
-        minor[1, 1] = vxs[1, minorIndxs[i][1]]
-        minorVal = minorIndxs[i][2] * np.linalg.det(minor)
-        val = vxs[0, i] * minorVal
+        minor[1, 0] = vxs[2, minorIndxs[i][0]]
+        minor[1, 1] = vxs[2, minorIndxs[i][1]]
+        print(minor)
+        # minorVal = minorIndxs[i][2] * np.linalg.det(minor)
+        minorVal = minorIndxs[i][2] * (minor[0, 0] * minor[1, 1] - minor[1, 0] * minor[0, 1])
+        # print(minorIndxs[i][2])
+        print("minor=", minorVal)
+        val = vxs[i, 0] * minorVal
         result.append(val)
+    maxVal = np.max(np.abs(result))
+    # maxVal = maxVal if maxVal != 0 else 1
+    print(maxVal)
+    print('norm', result)
+    result = result / maxVal
+    print('normalized', result)
     return result

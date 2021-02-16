@@ -37,7 +37,7 @@ class DisplayModel:
         self.displayMode = DispModes.wireFrame
         self.edgesList1 = self.model.get_unique_edges()
         self.baseVXsCoords = self.model.get_vxs_np_array()
-        self.countVXCoords = np.zeros_like(self.baseVXsCoords)
+        self.countVXCoords = self.baseVXsCoords
         self.screenResolution = screen
         self.bodyCenter = vm.body_center_count(self.baseVXsCoords)
         print(self.bodyCenter)
@@ -46,8 +46,9 @@ class DisplayModel:
         self.model.set_scale(10)
         self.model.set_normal((0, 0, 0))
         self.screen = None
-        print(self.model.get_all_faces())
+        # print(self.model.get_all_faces())
         self.currentFCsNormal = self._count_fcs_normals(faces=self.model.get_all_faces())
+        print(self.currentFCsNormal)
         # TODO initialize surface analize
 
     def set_display_mode(self, mode: DispModes):
@@ -95,7 +96,6 @@ class DisplayModel:
         result = []
         for face in faces:
             vxsList = list(face.get_vertexes())
-            print(vxsList)
             vxcMatrix = vm.make_surf_MX_from_VX_array(vxs=self.countVXCoords, pts=vxsList)
             result.append(vm.count_norm_to_surf(vxcMatrix))
         return np.array(result)
