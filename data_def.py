@@ -369,8 +369,9 @@ class BodyFaces():
         # for edge in self.edges:
         #     edgeList.append(edge)
         return edgeList
+
     def get_all_faces(self):
-        faceList=[]
+        faceList = []
         for face in self.faces:
             faceList.append(face)
         # return self.faces

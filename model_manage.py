@@ -46,6 +46,7 @@ def main():
                     "СС": [pg.K_PAGEDOWN, turn_model, {'az': -10}],
                     "ZI": [pg.K_LSHIFT, rescale, {'z': 1.1}],
                     "ZO": [pg.K_LCTRL, rescale, {'z': 0.9}],
+                    #TODO ctrl+Z function with log
                     }
         while True:
             if sd.user_want_exit():
@@ -61,6 +62,7 @@ def main():
                         fxArgs = keyAction[2]
                         if evnt.key == checkKey:
                             keyFx(**fxArgs)
+                            #TODO comand log for ctrl+z
                             return
 
 

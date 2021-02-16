@@ -94,8 +94,9 @@ class DisplayModel:
     def _count_fcs_normals(self, faces: Sequence[dd.Face]):
         result = []
         for face in faces:
-            vxsList = face.get_vertexes()
-            vxcMatrix = vm.make_surf_MX_from_VX_array(pts=self.countVXCoords, vxs=vxsList)
+            vxsList = list(face.get_vertexes())
+            print(vxsList)
+            vxcMatrix = vm.make_surf_MX_from_VX_array(vxs=self.countVXCoords, pts=vxsList)
             result.append(vm.count_norm_to_surf(vxcMatrix))
         return np.array(result)
 
