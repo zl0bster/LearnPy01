@@ -197,7 +197,7 @@ def make_surf_MX_from_VX_array(vxs: np.array, pts: Sequence[int]) -> np.array:
     result = []
     # print("make surface from these points",vxs)
     for ind in pts:
-        # print(ind, '-', vxs[ind])
+        print(ind, '-', vxs[ind])
         result.append(list(vxs[ind]))
     return np.array(result)
 
@@ -223,8 +223,8 @@ def count_norm_to_surf(vxs: np.array) -> Sequence[float]:
         result.append(val)
     maxVal = np.max(np.abs(result))
     # maxVal = maxVal if maxVal != 0 else 1
-    print(maxVal)
-    print('norm', result)
+    # print(maxVal)
+    # print('norm', result)
     result = result / maxVal
     print('normalized', result)
     return result

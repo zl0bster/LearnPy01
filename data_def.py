@@ -146,6 +146,7 @@ class EdgeList():
         self.edges: list = []
         self.colinears: list = []
         self.ownerSurface = []
+        self.isFlat = []
 
     def __len__(self):
         return len(self.edges)
@@ -202,18 +203,32 @@ class EdgeList():
                     result.append(j)
             self.colinears.append(result)
 
-    def get_unique(self) -> Sequence[int]:
+    def get_unique(self, noFlat: bool = False) -> Sequence[int]:
         # if len(self.colinears) == 0:
         if not self.colinears:
             self.find_collinears()
+        if noFlat and not self.isFlat:
+            raise AttributeError('Flattness array is not filled yet')
         result = []
         for i in range(len(self.colinears)):
             colinearEdgeNumber = self.colinears[i]
+            if noFlat and self.isFlat[i]: # edge on flat surface should not be added
+                continue
             if len(colinearEdgeNumber) == 0:
                 result.append(self.get_edge(i))
             elif i < colinearEdgeNumber[0]:
                 result.append(self.get_edge(i))
         return result
+
+    def set_flattness(self, val: bool, item: Optional[int] = None):
+        if item is None:
+            self.isFlat.append(val)
+            return
+        if not isinstance(item, int):
+            raise TypeError(f"{item} - wrong index type")
+        if 0 <= item < len(self.edges):
+            self.isFlat[item] = val
+        raise IndexError
 
 
 class Face():

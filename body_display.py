@@ -48,7 +48,8 @@ class DisplayModel:
         self.screen = None
         # print(self.model.get_all_faces())
         self.currentFCsNormal = self._count_fcs_normals(faces=self.model.get_all_faces())
-        print(self.currentFCsNormal)
+        # print(self.currentFCsNormal)
+        self._mark_flat_edges()
         # TODO initialize surface analize
 
     def set_display_mode(self, mode: DispModes):
@@ -100,6 +101,18 @@ class DisplayModel:
             result.append(vm.count_norm_to_surf(vxcMatrix))
         return np.array(result)
 
+    def _mark_flat_edges(self):
+        for edge in range(len(self.model.edges)):
+            surface1 = self.model.edges.get_edges_surf(edge)
+            surface2 = self.model.edges.get_edge_colinear(edge)[0]
+            surface2 = surface2 if surface2 else 0
+            surface2 = self.model.edges.get_edges_surf(surface2)
+            print(surface2)
+            # isFlat = False
+            print(edge, self.currentFCsNormal[surface1], self.currentFCsNormal[surface2])
+            isFlat = all(self.currentFCsNormal[surface1] == self.currentFCsNormal[surface2])
+            print(isFlat)
+            self.model.edges.set_flattness(val=isFlat)
 
     class Surfaces:
         """should define attributes if surface:
