@@ -33,9 +33,11 @@ def main():
             bodyOrientation[Z] = vm.shift2pi_correction(bodyOrientation[Z])
         model.set_normal(tuple(bodyOrientation))
 
-
     def rescale(z: float = 1.0):
         model.set_scale(z * model.get_scale())
+
+    def set_view_angle(ax: int, ay: int, az: int):
+        model.set_normal((ax, ay, az))
 
     def read_button():
         keyTable = {"UP": [pg.K_UP, turn_model, {'ax': 10}],
@@ -46,7 +48,11 @@ def main():
                     "СС": [pg.K_PAGEDOWN, turn_model, {'az': -10}],
                     "ZI": [pg.K_LSHIFT, rescale, {'z': 1.1}],
                     "ZO": [pg.K_LCTRL, rescale, {'z': 0.9}],
-                    #TODO ctrl+Z function with log
+                    'V7': [pg.K_7, set_view_angle, {'ax': 45, 'ay': 0, 'az': 45}],
+                    'V8': [pg.K_8, set_view_angle, {'ax': 0, 'ay': 90, 'az': 45}],
+                    'V9': [pg.K_9, set_view_angle, {'ax': 120, 'ay': 90, 'az': 90}],
+                    'V0': [pg.K_0, set_view_angle, {'ax': 120, 'ay': 90, 'az': 0}],
+                    # TODO ctrl+Z function with log
                     }
         while True:
             if sd.user_want_exit():
@@ -62,24 +68,24 @@ def main():
                         fxArgs = keyAction[2]
                         if evnt.key == checkKey:
                             keyFx(**fxArgs)
-                            #TODO comand log for ctrl+z
+                            # TODO comand log for ctrl+z
                             return
 
-
     def print_data():
-        f1 = pg.font.Font(None, 18)
+        f1 = pg.font.Font(None, 22)
         txtpos = (10, 20)
         orientation = model.get_normal()
         lines = [f'Model: {stlFile}',
                  f'Surfaces: {len(model)}',
+                 f'Points: {len(model.vertexes)}',
                  "",
                  "Use arrow keys and PG_UP/PG_DN to turn model",
                  "Left SHIFT/CTRL to zoom in/out",
                  "",
                  f'Scale: {int(model.get_scale())}',
-                 f'X angle:{int(np.degrees(orientation[X]))}',
-                 f'Y angle:{int(np.degrees(orientation[Y]))}',
-                 f'Z angle:{int(np.degrees(orientation[Z]))}'
+                 f'X angle: {int(np.degrees(orientation[X]))} ',
+                 f'Y angle: {int(np.degrees(orientation[Y]))} ',
+                 f'Z angle: {int(np.degrees(orientation[Z]))} '
                  ]
         for i, line in enumerate(lines):
             text1 = f1.render(line, True, sd.COLOR_DARK_YELLOW)

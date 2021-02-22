@@ -49,7 +49,7 @@ class DisplayModel:
         # print(self.model.get_all_faces())
         self.currentFCsNormal = self._count_fcs_normals(faces=self.model.get_all_faces())
         # print(self.currentFCsNormal)
-        self._mark_flat_edges()
+        # self._mark_flat_edges()
         # TODO initialize surface analize
 
     def set_display_mode(self, mode: DispModes):
