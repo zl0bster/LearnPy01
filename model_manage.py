@@ -1,5 +1,6 @@
 import argparse
 import sys
+import time
 
 import numpy as np
 import pygame as pg
@@ -37,9 +38,10 @@ def main():
         model.set_scale(z * model.get_scale())
 
     def set_view_angle(ax: int, ay: int, az: int):
-        model.set_normal((ax, ay, az))
+        model.set_normal((np.radians(ax), np.radians(ay), np.radians(az)))
 
     def read_button():
+        tickSize = 0.15
         keyTable = {"UP": [pg.K_UP, turn_model, {'ax': 10}],
                     "DN": [pg.K_DOWN, turn_model, {'ax': -10}],
                     "LT": [pg.K_LEFT, turn_model, {'ay': 10}],
@@ -48,28 +50,45 @@ def main():
                     "СС": [pg.K_PAGEDOWN, turn_model, {'az': -10}],
                     "ZI": [pg.K_LSHIFT, rescale, {'z': 1.1}],
                     "ZO": [pg.K_LCTRL, rescale, {'z': 0.9}],
-                    'V7': [pg.K_7, set_view_angle, {'ax': 45, 'ay': 0, 'az': 45}],
+                    'V7': [pg.K_7, set_view_angle, {'ax': 45, 'ay': 0, 'az': 90}],
                     'V8': [pg.K_8, set_view_angle, {'ax': 0, 'ay': 90, 'az': 45}],
                     'V9': [pg.K_9, set_view_angle, {'ax': 120, 'ay': 90, 'az': 90}],
                     'V0': [pg.K_0, set_view_angle, {'ax': 120, 'ay': 90, 'az': 0}],
                     # TODO ctrl+Z function with log
                     }
+        timeTick = time.time()
+        nonlocal action
         while True:
             if sd.user_want_exit():
                 sd.quit()
             for evnt in pg.event.get():
                 if evnt.type == pg.QUIT:
-                    # sd.quit()
-                    sys.exit()
+                    sd.quit()
+                    # sys.exit()
                 elif evnt.type == pg.KEYDOWN:
-                    for keyAction in keyTable.values():
-                        checkKey = keyAction[0]
-                        keyFx = keyAction[1]
-                        fxArgs = keyAction[2]
+                    for keyAction in keyTable.keys():
+                        checkKey = keyTable[keyAction][0]
+                        keyFx = keyTable[keyAction][1]
+                        fxArgs = keyTable[keyAction][2]
                         if evnt.key == checkKey:
+                            action = keyAction
+                            # print(action)
                             keyFx(**fxArgs)
                             # TODO comand log for ctrl+z
                             return
+                elif evnt.type == pg.KEYUP:
+                    for keyAction in keyTable.keys():
+                        checkKey = keyTable[keyAction][0]
+                        if evnt.key == checkKey:
+                            action = None
+            toRepeat = tickSize < (time.time() - timeTick)
+            if action and toRepeat:
+                timeTick = time.time()
+                print('\r', f'action : {action} {timeTick} ', end="")
+                keyFx = keyTable[action][1]
+                fxArgs = keyTable[action][2]
+                keyFx(**fxArgs)
+                return
 
     def print_data():
         f1 = pg.font.Font(None, 22)
@@ -85,7 +104,8 @@ def main():
                  f'Scale: {int(model.get_scale())}',
                  f'X angle: {int(np.degrees(orientation[X]))} ',
                  f'Y angle: {int(np.degrees(orientation[Y]))} ',
-                 f'Z angle: {int(np.degrees(orientation[Z]))} '
+                 f'Z angle: {int(np.degrees(orientation[Z]))} ',
+                 f'key action: {action} '
                  ]
         for i, line in enumerate(lines):
             text1 = f1.render(line, True, sd.COLOR_DARK_YELLOW)
@@ -115,6 +135,7 @@ def main():
     sc = pg.display.set_mode((xResolution, yResolution))
     sc.fill(sd.COLOR_DARK_BLUE)
     displayModel.set_screen(screen=sc)
+    action = None
     while not sd.user_want_exit():
         displayModel.draw_body()
         print_data()
