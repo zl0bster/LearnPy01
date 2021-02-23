@@ -50,39 +50,39 @@ def main():
                     "СС": [pg.K_PAGEDOWN, turn_model, {'az': -10}],
                     "ZI": [pg.K_LSHIFT, rescale, {'z': 1.1}],
                     "ZO": [pg.K_LCTRL, rescale, {'z': 0.9}],
-                    'V7': [pg.K_7, set_view_angle, {'ax': 45, 'ay': 0, 'az': 90}],
-                    'V8': [pg.K_8, set_view_angle, {'ax': 0, 'ay': 90, 'az': 45}],
-                    'V9': [pg.K_9, set_view_angle, {'ax': 120, 'ay': 90, 'az': 90}],
-                    'V0': [pg.K_0, set_view_angle, {'ax': 120, 'ay': 90, 'az': 0}],
+                    'V1': [pg.K_1, set_view_angle, {'ax': 0, 'ay': 0, 'az': 0}],
+                    'V2': [pg.K_2, set_view_angle, {'ax': 0, 'ay': 180, 'az': 0}],
+                    'V3': [pg.K_3, set_view_angle, {'ax': 0, 'ay': 90, 'az': 0}],
+                    'V4': [pg.K_4, set_view_angle, {'ax': 0, 'ay': 270, 'az': 0}],
+                    'V5': [pg.K_5, set_view_angle, {'ax': 270, 'ay': 0, 'az': 0}],
+                    'V6': [pg.K_6, set_view_angle, {'ax': 270, 'ay': 180, 'az': 0}],
+                    'V7': [pg.K_7, set_view_angle, {'ax': 45, 'ay': 45, 'az': 0}],
+                    'V8': [pg.K_8, set_view_angle, {'ax': 60, 'ay': 60, 'az': 0}],
+                    'V9': [pg.K_9, set_view_angle, {'ax': 45, 'ay': 135, 'az': 0}],
+                    'V0': [pg.K_0, set_view_angle, {'ax': 45, 'ay': 235, 'az': 0}],
                     # TODO ctrl+Z function with log
                     }
         timeTick = time.time()
         nonlocal action
         while True:
+            # TODO comand log for ctrl+z
             if sd.user_want_exit():
                 sd.quit()
             for evnt in pg.event.get():
                 if evnt.type == pg.QUIT:
                     sd.quit()
                     # sys.exit()
-                elif evnt.type == pg.KEYDOWN:
-                    for keyAction in keyTable.keys():
-                        checkKey = keyTable[keyAction][0]
-                        keyFx = keyTable[keyAction][1]
-                        fxArgs = keyTable[keyAction][2]
-                        if evnt.key == checkKey:
-                            action = keyAction
-                            # print(action)
-                            keyFx(**fxArgs)
-                            # TODO comand log for ctrl+z
-                            return
-                elif evnt.type == pg.KEYUP:
+                elif evnt.type in [pg.KEYDOWN, pg.KEYUP]:
                     for keyAction in keyTable.keys():
                         checkKey = keyTable[keyAction][0]
                         if evnt.key == checkKey:
-                            action = None
+                            if evnt.type == pg.KEYUP:
+                                action = None
+                            else:
+                                action = keyAction
+                            break
             toRepeat = tickSize < (time.time() - timeTick)
-            if action and toRepeat:
+            if (action and toRepeat):
                 timeTick = time.time()
                 print('\r', f'action : {action} {timeTick} ', end="")
                 keyFx = keyTable[action][1]
