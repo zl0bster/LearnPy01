@@ -12,6 +12,7 @@ import vertex_manipulations as vm
 X = 0
 Y = 1
 Z = 2
+DEBUG = 1
 
 
 class DispModes(Enum):
@@ -46,10 +47,16 @@ class DisplayModel:
         self.model.set_scale(10)
         self.model.set_normal((0, 0, 0))
         self.screen = None
-        # print(self.model.get_all_faces())
         self.currentFCsNormal = self._count_fcs_normals(faces=self.model.get_all_faces())
-        # print(self.currentFCsNormal)
-        # self._mark_flat_edges()
+        self._mark_flat_edges()
+        if DEBUG:
+            # print(self.model.get_all_faces())
+            print(self.currentFCsNormal)
+            # print(self.model.edges.isFlat)
+            print(f"""counted:
+                faces: {len(self.model.faces)}
+                edges: {len(self.model.edges)}
+                flats: {len(self.model.edges.isFlat)}""")
         # TODO initialize surface analize
 
     def set_display_mode(self, mode: DispModes):
@@ -95,7 +102,8 @@ class DisplayModel:
 
     def _count_fcs_normals(self, faces: Sequence[dd.Face]):
         result = []
-        for face in faces:
+        for i, face in enumerate(faces):
+            dd.progress_show(f"normal for face : {i} ")
             vxsList = list(face.get_vertexes())
             vxcMatrix = vm.make_surf_MX_from_VX_array(vxs=self.countVXCoords, pts=vxsList)
             result.append(vm.count_norm_to_surf(vxcMatrix))
@@ -104,14 +112,20 @@ class DisplayModel:
     def _mark_flat_edges(self):
         for edge in range(len(self.model.edges)):
             surface1 = self.model.edges.get_edges_surf(edge)
-            surface2 = self.model.edges.get_edge_colinear(edge)[0]
-            surface2 = surface2 if surface2 else 0
-            surface2 = self.model.edges.get_edges_surf(surface2)
-            print(surface2)
-            # isFlat = False
-            print(edge, self.currentFCsNormal[surface1], self.currentFCsNormal[surface2])
-            isFlat = all(self.currentFCsNormal[surface1] == self.currentFCsNormal[surface2])
-            print(isFlat)
+            if self.model.edges.get_edge_colinear(edge):
+                surface2 = self.model.edges.get_edge_colinear(edge)[0]
+                surface2 = surface2 if surface2 else 0
+                surface2 = self.model.edges.get_edges_surf(surface2)
+                normVec1 = np.array(self.currentFCsNormal[surface1])
+                normVec2 = np.array(self.currentFCsNormal[surface2])
+                deltaNorm = np.max(np.abs(normVec2-normVec1))
+                isFlat = (deltaNorm <= 0.02)
+                if DEBUG:
+                    print(f"edge {edge} between {surface1} and {surface2}")
+                    print(f"  {normVec1} and {normVec2}")
+                    print(f"  delta: {deltaNorm} and found flat: {isFlat}")
+            else:
+                isFlat = False
             self.model.edges.set_flattness(val=isFlat)
 
     class Surfaces:
