@@ -12,7 +12,7 @@ import vertex_manipulations as vm
 X = 0
 Y = 1
 Z = 2
-DEBUG = 1
+DEBUG = 0
 
 
 class DispModes(Enum):
@@ -123,6 +123,7 @@ class DisplayModel:
         return np.array(result)
 
     def _mark_flat_edges(self):
+        nonPairedEdges = 0
         for edge in range(len(self.model.edges)):
             surface1 = self.model.edges.get_edges_surf(edge)
             if self.model.edges.get_edge_colinear(edge):
@@ -139,7 +140,15 @@ class DisplayModel:
                     print(f"  delta: {deltaNorm} and found flat: {isFlat}")
             else:
                 isFlat = False
+                nonPairedEdges += 1
             self.model.edges.set_flattness(val=isFlat)
+        if DEBUG:
+            print("+ " * 10)
+            print(f'total edges count: {len(self.model.edges)}')
+            print(f'unique edges count: {len(self.edgesList1)}')
+            # print(f'nonflat edges count: {len(self.edgesList2)}')
+            print(f'edges without pair: {nonPairedEdges}')
+            print("+ " * 10)
 
     class Surfaces:
         """should define attributes if surface:

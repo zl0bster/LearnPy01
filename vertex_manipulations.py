@@ -14,6 +14,8 @@ A = 1
 E = 2
 Q = 3
 
+DEBUG = 1
+
 
 def envelope_box_count(points: np.array) -> Sequence[float]:  # np vertex array
     """Finds max and min coords in all axes to count envelope"""
@@ -204,27 +206,30 @@ def make_surf_MX_from_VX_array(vxs: np.array, pts: Sequence[int]) -> np.array:
 
 def count_norm_to_surf(vxs: np.array) -> Sequence[float]:
     """creates minor matrixes and counts their determinants"""
-    result = []
+    result = np.zeros(3)
     minorIndxs = [[1, 2, 1], [0, 2, -1], [0, 1, 1]]
-    # print('* ' * 10)
-    # print(vxs)
     for i in range(3):
-        minor = np.zeros([2, 2])
-        minor[0, 0] = vxs[1, minorIndxs[i][0]]
-        minor[0, 1] = vxs[1, minorIndxs[i][1]]
-        minor[1, 0] = vxs[2, minorIndxs[i][0]]
-        minor[1, 1] = vxs[2, minorIndxs[i][1]]
-        # print(minor)
-        # minorVal = minorIndxs[i][2] * np.linalg.det(minor)
-        minorVal = minorIndxs[i][2] * (minor[0, 0] * minor[1, 1] - minor[1, 0] * minor[0, 1])
-        # print(minorIndxs[i][2])
-        # print("minor=", minorVal)
-        val = vxs[i, 0] * minorVal
-        result.append(val)
-    maxVal = np.max(np.abs(result))
-    # maxVal = maxVal if maxVal != 0 else 1
-    # print(maxVal)
-    # print('norm', result)
-    result = result / maxVal
-    # print('normalized', result)
+        coordIsSame = np.equal(vxs[0, i],  vxs[1, i]) and np.equal(vxs[1, i], vxs[2, i])
+        if coordIsSame:
+            result[minorIndxs[i][0]] = 0.
+            result[minorIndxs[i][1]] = 0.
+            result[i] = 1.
+    if np.max(result) == 0:
+        for i in range(3):
+            minor = np.zeros([2, 2])
+            minor[0, 0] = vxs[1, minorIndxs[i][0]]
+            minor[0, 1] = vxs[1, minorIndxs[i][1]]
+            minor[1, 0] = vxs[2, minorIndxs[i][0]]
+            minor[1, 1] = vxs[2, minorIndxs[i][1]]
+            minorVal = np.round(minorIndxs[i][2] * np.linalg.det(minor))
+            # minorVal = minorIndxs[i][2] * (minor[0, 0] * minor[1, 1] - minor[1, 0] * minor[0, 1])
+            val = vxs[i, 0] * minorVal
+            result[i] = val
+        maxVal = np.max(np.abs(result))
+        result = result / maxVal
+    if DEBUG:
+        print('* ' * 10)
+        print(vxs)
+        # print('max value:', maxVal)
+        print('normalized:', result)
     return result
