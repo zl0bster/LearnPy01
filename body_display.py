@@ -35,7 +35,7 @@ class DisplayModel:
 
     def __init__(self, modelData: dd.BodyFaces, screen: Sequence[int]):
         self.model = modelData
-        self.displayMode = DispModes.wireFrame
+        self.displayMode = DispModes.flatsHidden
         self.edgesList1 = self.model.get_unique_edges()
         self.baseVXsCoords = self.model.get_vxs_np_array()
         self.countVXCoords = self.baseVXsCoords
@@ -49,11 +49,12 @@ class DisplayModel:
         self.screen = None
         self.currentFCsNormal = self._count_fcs_normals(faces=self.model.get_all_faces())
         self._mark_flat_edges()
+        self.edgesList2 = self.get_non_flat_edges()
         if DEBUG:
             # print(self.model.get_all_faces())
             print(self.currentFCsNormal)
             # print(self.model.edges.isFlat)
-            print(f"""counted:
+            print(f"""       counted:
                 faces: {len(self.model.faces)}
                 edges: {len(self.model.edges)}
                 flats: {len(self.model.edges.isFlat)}""")
@@ -68,7 +69,19 @@ class DisplayModel:
 
     def get_edges(self) -> Sequence[int]:
         """returns list of edges to display"""
-        return self.edgesList1
+        if self.displayMode == DispModes.flatsHidden:
+            return self.edgesList2
+        else:
+            return self.edgesList1
+
+    def get_non_flat_edges(self):
+        nonFlatEdgesToShow = []
+        for i, edge in enumerate(self.model.edges):
+            if DEBUG:
+                print(i, self.model.edges.get_flattness(i), edge)
+            if not self.model.edges.get_flattness(i):
+                nonFlatEdgesToShow.append(edge)
+        return nonFlatEdgesToShow
 
     def get_surfaces(self) -> Sequence[int]:
         """returns list of surfaces to display"""
@@ -118,7 +131,7 @@ class DisplayModel:
                 surface2 = self.model.edges.get_edges_surf(surface2)
                 normVec1 = np.array(self.currentFCsNormal[surface1])
                 normVec2 = np.array(self.currentFCsNormal[surface2])
-                deltaNorm = np.max(np.abs(normVec2-normVec1))
+                deltaNorm = np.max(np.abs(normVec2 - normVec1))
                 isFlat = (deltaNorm <= 0.02)
                 if DEBUG:
                     print(f"edge {edge} between {surface1} and {surface2}")

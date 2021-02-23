@@ -1,5 +1,4 @@
 import argparse
-import sys
 import time
 
 import numpy as np
@@ -40,6 +39,9 @@ def main():
     def set_view_angle(ax: int, ay: int, az: int):
         model.set_normal((np.radians(ax), np.radians(ay), np.radians(az)))
 
+    def set_view_mode(mode: bd.DispModes):
+        displayModel.set_display_mode(mode)
+
     def read_button():
         tickSize = 0.15
         keyTable = {"UP": [pg.K_UP, turn_model, {'ax': 10}],
@@ -60,6 +62,8 @@ def main():
                     'V8': [pg.K_8, set_view_angle, {'ax': 60, 'ay': 60, 'az': 0}],
                     'V9': [pg.K_9, set_view_angle, {'ax': 45, 'ay': 135, 'az': 0}],
                     'V0': [pg.K_0, set_view_angle, {'ax': 45, 'ay': 235, 'az': 0}],
+                    'VM1': [pg.K_F9, set_view_mode, {'mode': bd.DispModes.wireFrame}],
+                    'VM2': [pg.K_F8, set_view_mode, {'mode': bd.DispModes.flatsHidden}],
                     # TODO ctrl+Z function with log
                     }
         timeTick = time.time()
@@ -105,6 +109,7 @@ def main():
                  f'X angle: {int(np.degrees(orientation[X]))} ',
                  f'Y angle: {int(np.degrees(orientation[Y]))} ',
                  f'Z angle: {int(np.degrees(orientation[Z]))} ',
+                 f'View mode: {displayModel.displayMode}',
                  f'key action: {action} '
                  ]
         for i, line in enumerate(lines):

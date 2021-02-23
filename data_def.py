@@ -230,6 +230,12 @@ class EdgeList():
             self.isFlat[item] = val
         raise IndexError
 
+    def get_flattness(self, item: int):
+        if not isinstance(item, int):
+            raise TypeError(f"{item} - wrong index type")
+        if 0 <= item < len(self.edges):
+            return self.isFlat[item]
+        raise IndexError
 
 class Face():
     """Keeps vertex list, edges list. May keep center point and normal vector"""
