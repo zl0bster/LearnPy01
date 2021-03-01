@@ -16,6 +16,7 @@ E = 2
 Q = 3
 
 DEBUG = 1
+GAP: np.float32 = 0.005
 
 
 def envelope_box_count(points: np.array) -> Sequence[float]:  # np vertex array
@@ -212,7 +213,8 @@ def count_norm_to_surf(vxs: np.array) -> Sequence[float]:
     result = np.zeros(3)
     minorIndxs = [[1, 2, 1], [0, 2, -1], [0, 1, 1]]
     for i in range(3):
-        coordIsSame = np.equal(vxs[0, i],  vxs[1, i]) and np.equal(vxs[1, i], vxs[2, i])
+        # coordIsSame = np.equal(vxs[0, i],  vxs[1, i]) and np.equal(vxs[1, i], vxs[2, i])
+        coordIsSame = (np.abs(vxs[0, i] - vxs[1, i]) < GAP) and (np.abs(vxs[1, i] - vxs[2, i]) < GAP)
         if coordIsSame:
             result[minorIndxs[i][0]] = 0.
             result[minorIndxs[i][1]] = 0.
