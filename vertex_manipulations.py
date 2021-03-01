@@ -5,6 +5,7 @@
 from typing import Sequence
 
 import numpy as np
+from loguru import logger
 
 X = 0
 Y = 1
@@ -197,9 +198,11 @@ def quadrantDAE(pnt1: Sequence[float]) -> int:
 def make_surf_MX_from_VX_array(vxs: np.array, pts: Sequence[int]) -> np.array:
     """creates surface matrix for normal count"""
     result = []
+    logger.debug('make surfaces {time}')
     # print("make surface from these points",vxs)
     for ind in pts:
         # print(ind, '-', vxs[ind])
+        logger.debug(f'surface {ind} - {vxs[ind]}')
         result.append(list(vxs[ind]))
     return np.array(result)
 
@@ -227,9 +230,14 @@ def count_norm_to_surf(vxs: np.array) -> Sequence[float]:
             result[i] = val
         maxVal = np.max(np.abs(result))
         result = result / maxVal
-    if DEBUG:
-        print('* ' * 10)
-        print(vxs)
-        # print('max value:', maxVal)
-        print('normalized:', result)
+    logger.debug('count_normal at {time}\n{vxs}')
+    logger.debug(f'normalized vectors \n {result}')
+    # if DEBUG:
+    #     print('* ' * 10)
+    #     print(vxs)
+    #     # print('max value:', maxVal)
+    #     print('normalized:', result)
     return result
+
+logger.add('vert_manip.log', rotation='1 MB')
+logger.level("DEBUG")
