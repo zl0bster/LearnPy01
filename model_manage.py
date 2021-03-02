@@ -104,6 +104,7 @@ def main():
                  "",
                  "Use arrow keys and PG_UP/PG_DN to turn model",
                  "Left SHIFT/CTRL to zoom in/out",
+                 "Digit keys for preset views",
                  "",
                  f'Scale: {int(model.get_scale())}',
                  f'X angle: {int(np.degrees(orientation[X]))} ',

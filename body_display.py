@@ -4,6 +4,7 @@ from typing import Sequence  # , Any, Optional
 import numpy as np
 import pygame as pg
 import simple_draw as sd
+from loguru import logger
 
 import data_def as dd
 import vertex_manipulations as vm
@@ -25,12 +26,12 @@ class DispModes(Enum):
 
 
 class DisplayModel:
-    """TODO put here
+    """
     ---turn model
     ---rescale model
-    calc model pos
-    draw model
-    inout screen parameters
+    ---calc model pos
+    ---draw model
+    input screen parameters
     to manage all model data inside class"""
 
     def __init__(self, modelData: dd.BodyFaces, screen: Sequence[int]):
@@ -50,14 +51,19 @@ class DisplayModel:
         self.currentFCsNormal = self._count_fcs_normals(faces=self.model.get_all_faces())
         self._mark_flat_edges()
         self.edgesList2 = self.get_non_flat_edges()
-        if DEBUG:
-            # print(self.model.get_all_faces())
-            print(self.currentFCsNormal)
-            # print(self.model.edges.isFlat)
-            print(f"""       counted:
+        logger.debug(f"""       counted:
                 faces: {len(self.model.faces)}
                 edges: {len(self.model.edges)}
                 flats: {len(self.model.edges.isFlat)}""")
+        logger.debug(self.currentFCsNormal)
+        # if DEBUG:
+        #     # print(self.model.get_all_faces())
+        #     print(self.currentFCsNormal)
+        #     # print(self.model.edges.isFlat)
+        #     print(f"""       counted:
+        #         faces: {len(self.model.faces)}
+        #         edges: {len(self.model.edges)}
+        #         flats: {len(self.model.edges.isFlat)}""")
         # TODO initialize surface analize
 
     def set_display_mode(self, mode: DispModes):
@@ -68,24 +74,26 @@ class DisplayModel:
         sd.take_background()
 
     def get_edges(self) -> Sequence[int]:
-        """returns list of edges to display"""
+        """returns list of edges to display for different display modes"""
         if self.displayMode == DispModes.flatsHidden:
             return self.edgesList2
         else:
             return self.edgesList1
 
     def get_non_flat_edges(self):
+        """fills the list with edges numbers which are not between parallel surfaces"""
         nonFlatEdgesToShow = []
         for i, edge in enumerate(self.model.edges):
-            if DEBUG:
-                print(i, self.model.edges.get_flattness(i), edge)
+            logger.debug(i, self.model.edges.get_flattness(i), edge)
+            # if DEBUG:
+            #     print(i, self.model.edges.get_flattness(i), edge)
             if not self.model.edges.get_flattness(i):
                 nonFlatEdgesToShow.append(edge)
         return nonFlatEdgesToShow
 
-    def get_surfaces(self) -> Sequence[int]:
-        """returns list of surfaces to display"""
-        ...
+    # def get_surfaces(self) -> Sequence[int]:
+    #     """returns list of surfaces to display"""
+    #     ...
 
     def draw_body(self):
         self._calc_current_model_pos()
@@ -99,6 +107,8 @@ class DisplayModel:
         sd.finish_drawing()  # removes  blinking
 
     def _calc_current_model_pos(self):
+        """ turns vertexes around 3 axis'
+        shifts vertexes to origin in center of screen"""
         orientation = list(self.model.get_normal())
         ax = orientation[X]
         ay = orientation[Y]
@@ -114,6 +124,8 @@ class DisplayModel:
         self.countVXCoords = currentBodyVxsXYZ
 
     def _count_fcs_normals(self, faces: Sequence[dd.Face]):
+        """ for each surface provides nparray with coords of 3 vertexes
+        and counts normal vector coords to add to the result list"""
         result = []
         for i, face in enumerate(faces):
             dd.progress_show(f"normal for face : {i} ")
@@ -123,6 +135,8 @@ class DisplayModel:
         return np.array(result)
 
     def _mark_flat_edges(self):
+        """compares normal vectors of neighbour surfaces
+        to check if they are colinear (faces are paralell, edge is flat)"""
         nonPairedEdges = 0
         for edge in range(len(self.model.edges)):
             surface1 = self.model.edges.get_edges_surf(edge)
@@ -134,41 +148,51 @@ class DisplayModel:
                 normVec2 = np.array(self.currentFCsNormal[surface2])
                 deltaNorm = np.max(np.abs(normVec2 - normVec1))
                 isFlat = (deltaNorm <= 0.02)
-                if DEBUG:
-                    print(f"edge {edge} between {surface1} and {surface2}")
-                    print(f"  {normVec1} and {normVec2}")
-                    print(f"  delta: {deltaNorm} and found flat: {isFlat}")
+                logger.debug(f"""edge {edge} between {surface1} and {surface2}
+                  {normVec1} and {normVec2}
+                  delta: {deltaNorm} and found flat: {isFlat}""")
+                # if DEBUG:
+                #     print(f"edge {edge} between {surface1} and {surface2}")
+                #     print(f"  {normVec1} and {normVec2}")
+                #     print(f"  delta: {deltaNorm} and found flat: {isFlat}")
             else:
                 isFlat = False
                 nonPairedEdges += 1
             self.model.edges.set_flattness(val=isFlat)
-        if DEBUG:
-            print("+ " * 10)
-            print(f'total edges count: {len(self.model.edges)}')
-            print(f'unique edges count: {len(self.edgesList1)}')
-            # print(f'nonflat edges count: {len(self.edgesList2)}')
-            print(f'edges without pair: {nonPairedEdges}')
-            print("+ " * 10)
-
-    class Surfaces:
-        """should define attributes if surface:
-        belongs to any sort of special kind (flat or cilinder) and to which face it belongs
-        orientation - +Z or -Z
-        which simple surface are its neighbours
-        """
-
-        def __init__(self):
-            # TODO get surfaces data from model
-            self.facesNormals = self._count_fcs_normals()
-            # TODO form flat surfaces on triangles
-            ...
-
-        def __faces_normal_count(self) -> np.array:
-            ...
+        logger.debug(f"""total edges count: {len(self.model.edges)}
+            unique edges count: {len(self.edgesList1)}
+            edges without pair: {nonPairedEdges}""")
+        # if DEBUG:
+        #     print("+ " * 10)
+        #     print(f'total edges count: {len(self.model.edges)}')
+        #     print(f'unique edges count: {len(self.edgesList1)}')
+        #     # print(f'nonflat edges count: {len(self.edgesList2)}')
+        #     print(f'edges without pair: {nonPairedEdges}')
+        #     print("+ " * 10)
 
 
-class Edges():
+#     class Surfaces:
+#         """should define attributes if surface:
+#         belongs to any sort of special kind (flat or cilinder) and to which face it belongs
+#         orientation - +Z or -Z
+#         which simple surface are its neighbours
+#         """
+#
+#         def __init__(self):
+#             # TODO get surfaces data from model
+#             self.facesNormals = self._count_fcs_normals()
+#             # TODO form flat surfaces on triangles
+#             ...
+#
+#         def __faces_normal_count(self) -> np.array:
+#             ...
+#
+#
+# class Edges():
+#
+#     def __init__(self):
+#         # TODO find collinear edge to each edge
+#         ...
 
-    def __init__(self):
-        # TODO find collinear edge to each edge
-        ...
+logger.add('body_display.log', rotation='1 MB')
+logger.level("DEBUG")
