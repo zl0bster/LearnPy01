@@ -2,6 +2,8 @@ import pickle
 from os.path import isfile
 from typing import Sequence
 
+import yaml as ya
+
 
 def str_2_XYZ(line: str) -> Sequence[float]:
     terms = line.split()
@@ -14,6 +16,9 @@ def str_2_XYZ(line: str) -> Sequence[float]:
 
 
 class stl_reader_2():
+    """iterator for STL txt file parsing
+    reads one serface points coordinates on each iteration
+    ***************************"""
     FACEBEGIN = 'outer loop'
     FACEEND = 'endloop'
     VXPREFIX = 'vertex'
@@ -54,45 +59,45 @@ class stl_reader_2():
                 return faceVXlist
 
 
-class stl_reader_1():
-    FACEBEGIN = 'outer loop'
-    FACEEND = 'endloop'
-    VXPREFIX = 'vertex'
-    ENDSOLID = 'endsolid'
-
-    def __init__(self, filename: str):
-        if isfile(filename):
-            self.filename = filename
-            print(f'file {filename} is found')
-        else:
-            raise FileExistsError
-
-    def __iter__(self):
-        # self.stlFile = open(self.filename, 'r', encoding='UTF-8')
-        with open(self.filename, 'r', encoding='UTF-8') as stlFile:
-            self.filetext = stlFile.readlines()
-        # solidName = self.filetext
-        # self.bodyName = solidName[6:]
-        self.nFaces = 0
-        return self
-
-    def __next__(self):
-        faceVXlist = []
-        for line in self.filetext:
-            line = line.strip()
-            if not line:
-                raise StopIteration
-            if line.count(self.VXPREFIX):
-                # print(line)
-                faceVXlist.append(str_2_XYZ(line))
-                continue
-            if line.count(self.FACEBEGIN):
-                faceVXlist = []
-                continue
-            if line.count(self.FACEEND):
-                self.nFaces += 1
-                # print(self.nFaces)
-                return faceVXlist
+# class stl_reader_1():
+#     FACEBEGIN = 'outer loop'
+#     FACEEND = 'endloop'
+#     VXPREFIX = 'vertex'
+#     ENDSOLID = 'endsolid'
+#
+#     def __init__(self, filename: str):
+#         if isfile(filename):
+#             self.filename = filename
+#             print(f'file {filename} is found')
+#         else:
+#             raise FileExistsError
+#
+#     def __iter__(self):
+#         # self.stlFile = open(self.filename, 'r', encoding='UTF-8')
+#         with open(self.filename, 'r', encoding='UTF-8') as stlFile:
+#             self.filetext = stlFile.readlines()
+#         # solidName = self.filetext
+#         # self.bodyName = solidName[6:]
+#         self.nFaces = 0
+#         return self
+#
+#     def __next__(self):
+#         faceVXlist = []
+#         for line in self.filetext:
+#             line = line.strip()
+#             if not line:
+#                 raise StopIteration
+#             if line.count(self.VXPREFIX):
+#                 # print(line)
+#                 faceVXlist.append(str_2_XYZ(line))
+#                 continue
+#             if line.count(self.FACEBEGIN):
+#                 faceVXlist = []
+#                 continue
+#             if line.count(self.FACEEND):
+#                 self.nFaces += 1
+#                 # print(self.nFaces)
+#                 return faceVXlist
 
 
 def test_read(name: str):
@@ -107,12 +112,29 @@ def pickleWrite(fileName: str, a: object):
     with open(file=fileName, mode='wb') as f:
         pickle.dump(a, f)
 
+
 def pickleRead(fileName: str) -> object:
     if not isfile(fileName):
         print(f"File {fileName} not found")
         raise FileExistsError
     with open(file=fileName, mode='rb') as f:
         return pickle.load(f)
+
+
+def yamlWrite(fileName: str, a: object):
+    if isfile(fileName):
+        print(f"File \"{fileName}\" already exists. \nIt will be overwritten")
+    with open(file=fileName, mode='wb') as f:
+        ya.dump(a, f)
+
+
+def yamlRead(fileName: str) -> object:
+    if not isfile(fileName):
+        print(f"File {fileName} not found")
+        raise FileExistsError
+    with open(file=fileName, mode='rb') as f:
+        return ya.load(f)
+
 
 if __name__ == '__main__':
     # line1 = 'vertex 0.000000e+000 4.600000e+001 0.000000e+000'

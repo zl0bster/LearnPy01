@@ -131,11 +131,13 @@ def main():
         savePKL = False
     else:
         picklFile = stlFile + '.pkl'
+        # yamlFile = stlFile + '.yaml'
         model = model_create(stlFile)
         savePKL = True
     displayModel = bd.DisplayModel(modelData=model, screen=[xResolution, yResolution])
     if savePKL:
         fr.pickleWrite(picklFile, model)
+        # fr.yamlWrite(yamlFile, model)
     sd._init()
     pg.font.init()
     sc = pg.display.set_mode((xResolution, yResolution))

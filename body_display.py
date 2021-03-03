@@ -84,7 +84,7 @@ class DisplayModel:
         """fills the list with edges numbers which are not between parallel surfaces"""
         nonFlatEdgesToShow = []
         for i, edge in enumerate(self.model.edges):
-            logger.debug(i, self.model.edges.get_flattness(i), edge)
+            logger.debug(f"{i}, {self.model.edges.get_flattness(i)}, {edge}")
             # if DEBUG:
             #     print(i, self.model.edges.get_flattness(i), edge)
             if not self.model.edges.get_flattness(i):
