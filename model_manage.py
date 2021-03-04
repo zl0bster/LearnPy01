@@ -1,5 +1,6 @@
 import argparse
 import time
+import os
 
 import numpy as np
 import pygame as pg
@@ -87,6 +88,7 @@ def main():
                             break
             toRepeat = tickSize < (time.time() - timeTick)
             if (action and toRepeat):
+                pg.event.clear()
                 timeTick = time.time()
                 print('\r', f'action : {action} {timeTick} ', end="")
                 keyFx = keyTable[action][1]
@@ -125,6 +127,7 @@ def main():
     sd.resolution = (xResolution, yResolution)
     stlFile: str = args.file.name  # 'LK1-002.01c.STL'
     fileType = stlFile[-3:].upper()
+
     print(stlFile, fileType)
     if fileType == 'PKL':
         model = fr.pickleRead(stlFile)
