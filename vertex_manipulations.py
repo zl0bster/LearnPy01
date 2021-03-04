@@ -5,6 +5,7 @@
 from typing import Sequence
 
 import numpy as np
+from loguru import logger
 
 X = 0
 Y = 1
@@ -14,9 +15,12 @@ A = 1
 E = 2
 Q = 3
 
+DEBUG = 1
+GAP: np.float32 = 0.005
+
 
 def envelope_box_count(points: np.array) -> Sequence[float]:  # np vertex array
-    """Finds max and min coords in all axes to count envelope"""
+    """Finds max and min coords in all axes to count envelope box"""
     xmax = np.max(points[:, 0])
     ymax = np.max(points[:, 1])
     zmax = np.max(points[:, 2])
@@ -145,7 +149,8 @@ def pointsXYZdelta(pnt1: Sequence[float], pnt2: Sequence[float]) -> Sequence[flo
 
 
 def array_plus_point(pts: np.array, pt: Sequence[float]) -> np.array:  # np vertex array in XYZ or DAE
-    """ADDs point's XYZ to each line of array"""
+    """ADDs point's XYZ to each line of array
+    to shift body center """
     result = np.zeros(pts.shape)
     for i in range(pts.shape[0]):
         result[i, X] = pts[i, X] + pt[X]
@@ -190,3 +195,53 @@ def quadrantDAE(pnt1: Sequence[float]) -> int:
     r = pnt1[R]
     a = pnt1[A]
     e = pnt1[E]
+
+
+def make_surf_MX_from_VX_array(vxs: np.array, pts: Sequence[int]) -> np.array:
+    """creates surface matrix for normal count"""
+    result = []
+    # print("make surface from these points",vxs)
+    for ind in pts:
+        # print(ind, '-', vxs[ind])
+        logger.debug(f'vertex {ind} - {vxs[ind]}')
+        result.append(list(vxs[ind]))
+    return np.array(result)
+
+
+def count_norm_to_surf(vxs: np.array) -> Sequence[float]:
+    """creates minor matrixes and counts their determinants
+    to define vector normal to surface
+    vxs - [ x, y, z] of 3 vertexes"""
+    result = np.zeros(3)
+    minorIndxs = [[1, 2, 1], [0, 2, -1], [0, 1, 1]]
+    for i in range(3):
+        # coordIsSame = np.equal(vxs[0, i],  vxs[1, i]) and np.equal(vxs[1, i], vxs[2, i])
+        coordIsSame = (np.abs(vxs[0, i] - vxs[1, i]) < GAP) and (np.abs(vxs[1, i] - vxs[2, i]) < GAP)
+        if coordIsSame:
+            result[minorIndxs[i][0]] = 0.
+            result[minorIndxs[i][1]] = 0.
+            result[i] = 1.
+    if np.max(result) == 0:
+        for i in range(3):
+            minor = np.zeros([2, 2])
+            minor[0, 0] = vxs[1, minorIndxs[i][0]]
+            minor[0, 1] = vxs[1, minorIndxs[i][1]]
+            minor[1, 0] = vxs[2, minorIndxs[i][0]]
+            minor[1, 1] = vxs[2, minorIndxs[i][1]]
+            minorVal = np.round(minorIndxs[i][2] * np.linalg.det(minor))
+            # minorVal = minorIndxs[i][2] * (minor[0, 0] * minor[1, 1] - minor[1, 0] * minor[0, 1])
+            val = vxs[i, 0] * minorVal
+            result[i] = val
+        maxVal = np.max(np.abs(result))
+        result = result / maxVal
+    logger.debug(f'count_normal\n{vxs}')
+    logger.debug(f'normalized vectors \n {result}')
+    # if DEBUG:
+    #     print('* ' * 10)
+    #     print(vxs)
+    #     # print('max value:', maxVal)
+    #     print('normalized:', result)
+    return result
+
+logger.add('vert_manip.log')
+logger.level("ERROR")

@@ -1,14 +1,15 @@
 import argparse
-import sys
+import time
+import os
 
 import numpy as np
 import pygame as pg
 import simple_draw as sd
 
+import body_display as bd
 import data_def as dd
 import file_read as fr
 import vertex_manipulations as vm
-import body_display as bd
 
 X = 0
 Y = 1
@@ -33,86 +34,91 @@ def main():
             bodyOrientation[Z] = vm.shift2pi_correction(bodyOrientation[Z])
         model.set_normal(tuple(bodyOrientation))
 
-    # def turn_model_1(a: int = 0, e: int = 0):  # azimuth and elevation angles are in degrees
-    #     bodyOrientation = list(model.get_normal())
-    #     print('*' * 20)
-    #     print(bodyOrientation)
-    #     print(a, e)
-    #     if a:
-    #         bodyOrientation[A] += np.radians(a)
-    #         if bodyOrientation[A] > np.pi:
-    #             bodyOrientation[A] = -2 * np.pi + bodyOrientation[A]
-    #         if bodyOrientation[A] < -np.pi:
-    #             bodyOrientation[A] = 2 * np.pi + bodyOrientation[A]
-    #     if e:
-    #         bodyOrientation[E] += np.radians(e)
-    #         if bodyOrientation[E] > np.pi:
-    #             bodyOrientation[E] = -2 * np.pi + bodyOrientation[E]
-    #         if bodyOrientation[E] < -np.pi:
-    #             bodyOrientation[E] = 2 * np.pi + bodyOrientation[E]
-    #     # print(bodyOrientation)
-    #     model.set_normal(tuple(bodyOrientation))
-
     def rescale(z: float = 1.0):
         model.set_scale(z * model.get_scale())
 
+    def set_view_angle(ax: int, ay: int, az: int):
+        model.set_normal((np.radians(ax), np.radians(ay), np.radians(az)))
+
+    def set_view_mode(mode: bd.DispModes):
+        displayModel.set_display_mode(mode)
+
     def read_button():
+        tickSize = 0.15
         keyTable = {"UP": [pg.K_UP, turn_model, {'ax': 10}],
                     "DN": [pg.K_DOWN, turn_model, {'ax': -10}],
                     "LT": [pg.K_LEFT, turn_model, {'ay': 10}],
                     "RT": [pg.K_RIGHT, turn_model, {'ay': -10}],
                     "CW": [pg.K_PAGEUP, turn_model, {'az': 10}],
                     "СС": [pg.K_PAGEDOWN, turn_model, {'az': -10}],
-                    "ZI": [pg.K_LSHIFT, rescale, {'z': 1.1}],
-                    "ZO": [pg.K_LCTRL, rescale, {'z': 0.9}],
+                    "ZI": [pg.K_z, rescale, {'z': 1.1}],
+                    "ZO": [pg.K_LALT, rescale, {'z': 0.9}],
+                    'V1': [pg.K_1, set_view_angle, {'ax': 0, 'ay': 0, 'az': 0}],
+                    'V2': [pg.K_2, set_view_angle, {'ax': 0, 'ay': 180, 'az': 0}],
+                    'V3': [pg.K_3, set_view_angle, {'ax': 0, 'ay': 90, 'az': 0}],
+                    'V4': [pg.K_4, set_view_angle, {'ax': 0, 'ay': 270, 'az': 0}],
+                    'V5': [pg.K_5, set_view_angle, {'ax': 270, 'ay': 0, 'az': 0}],
+                    'V6': [pg.K_6, set_view_angle, {'ax': 270, 'ay': 180, 'az': 0}],
+                    'V7': [pg.K_7, set_view_angle, {'ax': 45, 'ay': 45, 'az': 0}],
+                    'V8': [pg.K_8, set_view_angle, {'ax': 60, 'ay': 60, 'az': 0}],
+                    'V9': [pg.K_9, set_view_angle, {'ax': 45, 'ay': 135, 'az': 0}],
+                    'V0': [pg.K_0, set_view_angle, {'ax': 45, 'ay': 235, 'az': 0}],
+                    'VM1': [pg.K_F9, set_view_mode, {'mode': bd.DispModes.wireFrame}],
+                    'VM2': [pg.K_F8, set_view_mode, {'mode': bd.DispModes.flatsHidden}],
+                    # TODO ctrl+Z function with log
                     }
+        timeTick = time.time()
+        nonlocal action
         while True:
+            # TODO comand log for ctrl+z
             if sd.user_want_exit():
                 sd.quit()
             for evnt in pg.event.get():
                 if evnt.type == pg.QUIT:
-                    # sd.quit()
-                    sys.exit()
-                elif evnt.type == pg.KEYDOWN:
-                    for keyAction in keyTable.values():
-                        checkKey = keyAction[0]
-                        keyFx = keyAction[1]
-                        fxArgs = keyAction[2]
+                    sd.quit()
+                    # sys.exit()
+                elif evnt.type in [pg.KEYDOWN, pg.KEYUP]:
+                    for keyAction in keyTable.keys():
+                        checkKey = keyTable[keyAction][0]
                         if evnt.key == checkKey:
-                            keyFx(**fxArgs)
-                            return
-
-    def calc_model_pos():
-        orientation = list(model.get_normal())
-        ax = orientation[X]
-        ay = orientation[Y]
-        az = orientation[Z]
-        currentBodyVxsXYZ = np.multiply(vxsXYZcentered, model.get_scale())
-        currentBodyVxsXYZ = vm.arrayXYZrotX(pts=currentBodyVxsXYZ, a=ax)
-        currentBodyVxsXYZ = vm.arrayXYZrotY(pts=currentBodyVxsXYZ, a=ay)
-        currentBodyVxsXYZ = vm.arrayXYZrotZ(pts=currentBodyVxsXYZ, a=az)
-        currentBodyVxsXYZ = vm.array_plus_point(pts=currentBodyVxsXYZ,
-                                                pt=(xCenter, yCenter, 0))
-        return currentBodyVxsXYZ
+                            if evnt.type == pg.KEYUP:
+                                action = None
+                            else:
+                                action = keyAction
+                            break
+            toRepeat = tickSize < (time.time() - timeTick)
+            if (action and toRepeat):
+            # if action:
+                pg.event.clear()
+                # timeTick = time.time()
+                # print('\r', f'action : {action} {timeTick} ', end="")
+                keyFx = keyTable[action][1]
+                fxArgs = keyTable[action][2]
+                keyFx(**fxArgs)
+                return
 
     def print_data():
-        f1 = pg.font.Font(None, 18)
+        f1 = pg.font.Font(None, 22)
         txtpos = (10, 20)
         orientation = model.get_normal()
         lines = [f'Model: {stlFile}',
                  f'Surfaces: {len(model)}',
+                 f'Points: {len(model.vertexes)}',
                  "",
                  "Use arrow keys and PG_UP/PG_DN to turn model",
-                 "Left SHIFT/CTRL to zoom in/out",
+                 "Z/Left ALT to zoom in/out",
+                 "Digit keys for preset views",
                  "",
                  f'Scale: {int(model.get_scale())}',
-                 f'X angle:{int(np.degrees(orientation[X]))}',
-                 f'Y angle:{int(np.degrees(orientation[Y]))}',
-                 f'Z angle:{int(np.degrees(orientation[Z]))}'
+                 f'X angle: {int(np.degrees(orientation[X]))} ',
+                 f'Y angle: {int(np.degrees(orientation[Y]))} ',
+                 f'Z angle: {int(np.degrees(orientation[Z]))} ',
+                 f'View mode: {displayModel.displayMode}',
+                 f'key action: {action} '
                  ]
         for i, line in enumerate(lines):
             text1 = f1.render(line, True, sd.COLOR_DARK_YELLOW)
-            sc.blit(text1, (txtpos[0], txtpos[1]+20*i))
+            sc.blit(text1, (txtpos[0], txtpos[1] + 20 * i))
         pg.display.update()
 
     parser = parserDefinition()
@@ -120,32 +126,32 @@ def main():
     xResolution = args.xres
     yResolution = args.yres
     sd.resolution = (xResolution, yResolution)
-    xCenter = xResolution / 2
-    yCenter = yResolution / 2
     stlFile: str = args.file.name  # 'LK1-002.01c.STL'
     fileType = stlFile[-3:].upper()
+
     print(stlFile, fileType)
     if fileType == 'PKL':
         model = fr.pickleRead(stlFile)
+        savePKL = False
     else:
         picklFile = stlFile + '.pkl'
+        # yamlFile = stlFile + '.yaml'
         model = model_create(stlFile)
+        savePKL = True
+    displayModel = bd.DisplayModel(modelData=model, screen=[xResolution, yResolution])
+    if savePKL:
         fr.pickleWrite(picklFile, model)
-    vertex = model.get_vxs_np_array()
-    bodyCenter = vm.body_center_count(vertex)
-    print(bodyCenter)
-    vxsXYZcentered = vm.array_plus_point(pts=vertex,
-                                         pt=(-bodyCenter[X], -bodyCenter[Y], -bodyCenter[Z]))
-    model.set_scale(10)
-    model.set_normal((0, 0, 0))
+        # fr.yamlWrite(yamlFile, model)
     sd._init()
     pg.font.init()
+    # pg.key.set_repeat(delay=200, interval=150)
+    # pg.key.set_repeat(400, 250)
     sc = pg.display.set_mode((xResolution, yResolution))
     sc.fill(sd.COLOR_DARK_BLUE)
-    sd.take_background()
-    displayModel = bd.DisplayModel(modelData=model)
+    displayModel.set_screen(screen=sc)
+    action = None
     while not sd.user_want_exit():
-        draw_model_1(model=displayModel, screenVXs=calc_model_pos())
+        displayModel.draw_body()
         print_data()
         read_button()
 
@@ -167,17 +173,6 @@ def parserDefinition():
     return parser
 
 
-def draw_model_1(model: bd.DisplayModel, screenVXs):
-    edgesList = model.get_edges()
-    sd.start_drawing()  # removes  blinking
-    sd.draw_background()
-    for edge in edgesList:
-        pt1 = sd.get_point(screenVXs[edge[0], X], screenVXs[edge[0], Y])
-        pt2 = sd.get_point(screenVXs[edge[1], X], screenVXs[edge[1], Y])
-        sd.line(pt1, pt2)
-    sd.finish_drawing()  # removes  blinking
-
-
 def model_create(name: str) -> dd.BodyFaces:
     """Reads STL model data and creates data structures.
     :returns model data structure"""
@@ -191,29 +186,4 @@ def model_create(name: str) -> dd.BodyFaces:
 
 
 if __name__ == '__main__':
-    # stlFile = 'LK1-002.01c.STL'
-    # model = model_create(stlFile)
-    # vertex = model.get_vxs_np_array()
-    # print(len(model))
-    # print(model.get_vxs_np_array())
-    # print(model.get_all_edges())
-    # print(model.get_edges_list())
-    # print(model.get_vertex_list())
-    # print(model.get_centerXYZ())
-    # for i in range(len(model)):
-    #     print(i)
-    #     print(model.get_face_edges(i))
-    #     print(model.get_face_vertexes(i))
-    # print(vertex)
-    # print(envelope_box_count(vertex))
-    # print((focuse_point_count(vertex)))
-
-    # print(vertex.shape[0])
-    # print(vertex.size)
-    # for i in range(vertex.shape[0]):
-    #     print(vertex[i])
-    # vxDAE = arrayXYZtoDAE(vertex)
-    # # print(np.subtract(vertex, arrayDAEtoXYZ(vxDAE)))
-    # print(array_plus_point(pts=vertex, pt=(10, -10, 10)))
-    # read_button()
     main()

@@ -10,6 +10,11 @@ import numpy as np
     surface body"""
 
 
+def progress_show(line: str):
+    backward = '\r'
+    print(backward, line, end='')
+
+
 class PointXYZ():
     # x, y, z: float mm
     def __init__(self, x: float, y: float, z: float):
@@ -114,6 +119,7 @@ class PointsList():
             for i, val in enumerate(self.points):
                 if val[0] == a and val[1] == b and val[2] == c:
                     return i
+        progress_show(f'check added point  {len(self.points)}       ')
         self.points.append([a, b, c])
         # print(self.points) # debug
         return len(self.points) - 1
@@ -139,16 +145,19 @@ class EdgeList():
     def __init__(self):
         self.edges: list = []
         self.colinears: list = []
+        self.ownerSurface = []
+        self.isFlat = []
 
     def __len__(self):
         return len(self.edges)
 
-    def add_edge(self, v1: int, v2: int) -> int:
+    def add_edge(self, v1: int, v2: int, s: Optional[int] = None) -> int:
         if len(self.edges):
             for i, val in enumerate(self.edges):
                 if val[0] == v1 and val[1] == v2:
                     return i
         self.edges.append([v1, v2])
+        self.ownerSurface.append(s)
         return len(self.edges) - 1
 
     def get_edge(self, i: int) -> Sequence[int]:
@@ -156,6 +165,18 @@ class EdgeList():
             raise IndexError
         val = self.edges[i]
         return tuple(val)
+
+    def get_edges_surf(self, i: int) -> Sequence[int]:
+        if i >= len(self.edges):
+            raise IndexError
+        val = self.ownerSurface[i]
+        return val
+
+    def get_edge_colinear(self, i: int) -> Sequence[int]:
+        if i >= len(self.edges):
+            raise IndexError
+        val = self.colinears[i]
+        return val
 
     def __getitem__(self, item: int) -> Sequence[int]:
         if not isinstance(item, int):
@@ -169,6 +190,7 @@ class EdgeList():
         if self.colinears:
             return
         for i in range(len(self.edges)):
+            progress_show(f'find colinears for {i}\t edge of {len(self.edges)}    ')
             workEdge = self.edges[i]
             result = []
             for j in range(len(self.edges)):
@@ -181,20 +203,39 @@ class EdgeList():
                     result.append(j)
             self.colinears.append(result)
 
-    def get_unique(self) -> Sequence[int]:
+    def get_unique(self, noFlat: bool = False) -> Sequence[int]:
         # if len(self.colinears) == 0:
         if not self.colinears:
             self.find_collinears()
+        if noFlat and not self.isFlat:
+            raise AttributeError('Flattness array is not filled yet')
         result = []
         for i in range(len(self.colinears)):
-            colinearEdgeNumber=self.colinears[i]
-            print(i, colinearEdgeNumber)
-            if len(colinearEdgeNumber)==0:
+            colinearEdgeNumber = self.colinears[i]
+            if noFlat and self.isFlat[i]: # edge on flat surface should not be added
+                continue
+            if len(colinearEdgeNumber) == 0:
                 result.append(self.get_edge(i))
             elif i < colinearEdgeNumber[0]:
                 result.append(self.get_edge(i))
         return result
 
+    def set_flattness(self, val: bool, item: Optional[int] = None):
+        if item is None:
+            self.isFlat.append(val)
+            return
+        if not isinstance(item, int):
+            raise TypeError(f"{item} - wrong index type")
+        if 0 <= item < len(self.edges):
+            self.isFlat[item] = val
+        raise IndexError
+
+    def get_flattness(self, item: int):
+        if not isinstance(item, int):
+            raise TypeError(f"{item} - wrong index type")
+        if 0 <= item < len(self.edges):
+            return self.isFlat[item]
+        raise IndexError
 
 class Face():
     """Keeps vertex list, edges list. May keep center point and normal vector"""
@@ -253,6 +294,11 @@ class FaceList():
             raise IndexError
         return self.faces[i]
 
+    def __getitem__(self, item: int):
+        if item >= len(self.faces) or item < 0:
+            raise IndexError
+        return self.faces[item]
+
 
 class BodyFaces():
     """Keeps center coords, orientation.
@@ -271,6 +317,7 @@ class BodyFaces():
     def add_face(self, facePoints: Sequence[Sequence[float]]):
         vertexes = []
         edges = []
+        currentFaceId = len(self.faces)
         for point in facePoints:
             vertexes.append(self.vertexes.add_point(point))
         for i, vx in enumerate(vertexes):
@@ -279,7 +326,7 @@ class BodyFaces():
                 b = vertexes[0]
             else:
                 b = vertexes[i + 1]
-            edges.append(self.edges.add_edge(a, b))
+            edges.append(self.edges.add_edge(a, b, currentFaceId))
         if len(vertexes) > 3:
             raise OverflowError
         currFace = Face(vertexes=vertexes, edges=edges)
@@ -287,6 +334,11 @@ class BodyFaces():
 
     def __len__(self):
         return len(self.faces)
+
+    def __getitem__(self, item: int):
+        if item < 0 or item >= len(self):
+            raise IndexError
+        return self.faces[item]
 
     # def __iter__(self):
     #     self.nIterFace = 0
@@ -338,6 +390,13 @@ class BodyFaces():
         # for edge in self.edges:
         #     edgeList.append(edge)
         return edgeList
+
+    def get_all_faces(self):
+        faceList = []
+        for face in self.faces:
+            faceList.append(face)
+        # return self.faces
+        return faceList
 
     def get_unique_edges(self):
         return self.edges.get_unique()
