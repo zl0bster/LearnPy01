@@ -194,5 +194,5 @@ class DisplayModel:
 #         # TODO find collinear edge to each edge
 #         ...
 
-logger.add('body_display.log', rotation='1 MB')
+logger.add('body_display.log')
 logger.level("ERROR")
