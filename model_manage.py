@@ -1,5 +1,6 @@
 import argparse
 import time
+import os
 
 import numpy as np
 import pygame as pg
@@ -50,8 +51,8 @@ def main():
                     "RT": [pg.K_RIGHT, turn_model, {'ay': -10}],
                     "CW": [pg.K_PAGEUP, turn_model, {'az': 10}],
                     "СС": [pg.K_PAGEDOWN, turn_model, {'az': -10}],
-                    "ZI": [pg.K_LSHIFT, rescale, {'z': 1.1}],
-                    "ZO": [pg.K_LCTRL, rescale, {'z': 0.9}],
+                    "ZI": [pg.K_z, rescale, {'z': 1.1}],
+                    "ZO": [pg.K_LALT, rescale, {'z': 0.9}],
                     'V1': [pg.K_1, set_view_angle, {'ax': 0, 'ay': 0, 'az': 0}],
                     'V2': [pg.K_2, set_view_angle, {'ax': 0, 'ay': 180, 'az': 0}],
                     'V3': [pg.K_3, set_view_angle, {'ax': 0, 'ay': 90, 'az': 0}],
@@ -87,8 +88,10 @@ def main():
                             break
             toRepeat = tickSize < (time.time() - timeTick)
             if (action and toRepeat):
-                timeTick = time.time()
-                print('\r', f'action : {action} {timeTick} ', end="")
+            # if action:
+                pg.event.clear()
+                # timeTick = time.time()
+                # print('\r', f'action : {action} {timeTick} ', end="")
                 keyFx = keyTable[action][1]
                 fxArgs = keyTable[action][2]
                 keyFx(**fxArgs)
@@ -103,7 +106,7 @@ def main():
                  f'Points: {len(model.vertexes)}',
                  "",
                  "Use arrow keys and PG_UP/PG_DN to turn model",
-                 "Left SHIFT/CTRL to zoom in/out",
+                 "Z/Left ALT to zoom in/out",
                  "Digit keys for preset views",
                  "",
                  f'Scale: {int(model.get_scale())}',
@@ -125,6 +128,7 @@ def main():
     sd.resolution = (xResolution, yResolution)
     stlFile: str = args.file.name  # 'LK1-002.01c.STL'
     fileType = stlFile[-3:].upper()
+
     print(stlFile, fileType)
     if fileType == 'PKL':
         model = fr.pickleRead(stlFile)
@@ -140,6 +144,8 @@ def main():
         # fr.yamlWrite(yamlFile, model)
     sd._init()
     pg.font.init()
+    # pg.key.set_repeat(delay=200, interval=150)
+    # pg.key.set_repeat(400, 250)
     sc = pg.display.set_mode((xResolution, yResolution))
     sc.fill(sd.COLOR_DARK_BLUE)
     displayModel.set_screen(screen=sc)
