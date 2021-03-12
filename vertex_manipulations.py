@@ -244,4 +244,4 @@ def count_norm_to_surf(vxs: np.array) -> Sequence[float]:
     return result
 
 logger.add('Log/vert_manip.log')
-logger.level("DEBUG")
+logger.level("ERROR")

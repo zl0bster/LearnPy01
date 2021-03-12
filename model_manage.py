@@ -90,6 +90,7 @@ def main():
             if (action and toRepeat):
             # if action:
                 pg.event.clear()
+                pg.event.pump()
                 # timeTick = time.time()
                 # print('\r', f'action : {action} {timeTick} ', end="")
                 keyFx = keyTable[action][1]

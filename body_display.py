@@ -195,4 +195,4 @@ class DisplayModel:
 #         ...
 
 logger.add('Log/body_display.log')
-logger.level("DEBUG")
+logger.level("ERROR")
