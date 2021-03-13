@@ -1,6 +1,5 @@
 import argparse
 import time
-import os
 
 import numpy as np
 import pygame as pg
@@ -43,6 +42,10 @@ def main():
     def set_view_mode(mode: bd.DispModes):
         displayModel.set_display_mode(mode)
 
+    def init_quit():
+        sd.quit()
+        # sys.exit()
+
     def read_button():
         tickSize = 0.15
         keyTable = {"UP": [pg.K_UP, turn_model, {'ax': 10}],
@@ -65,18 +68,17 @@ def main():
                     'V0': [pg.K_0, set_view_angle, {'ax': 45, 'ay': 235, 'az': 0}],
                     'VM1': [pg.K_F9, set_view_mode, {'mode': bd.DispModes.wireFrame}],
                     'VM2': [pg.K_F8, set_view_mode, {'mode': bd.DispModes.flatsHidden}],
+                    'Q1': [pg.K_ESCAPE, init_quit, {}],
                     # TODO ctrl+Z function with log
                     }
         timeTick = time.time()
         nonlocal action
         while True:
             # TODO comand log for ctrl+z
-            if sd.user_want_exit():
-                sd.quit()
-            for evnt in pg.event.get():
+            evnt = pg.event.wait(100)
+            if not evnt == pg.NOEVENT:
                 if evnt.type == pg.QUIT:
-                    sd.quit()
-                    # sys.exit()
+                    init_quit()
                 elif evnt.type in [pg.KEYDOWN, pg.KEYUP]:
                     for keyAction in keyTable.keys():
                         checkKey = keyTable[keyAction][0]
@@ -88,10 +90,7 @@ def main():
                             break
             toRepeat = tickSize < (time.time() - timeTick)
             if (action and toRepeat):
-            # if action:
-                pg.event.clear()
-                # timeTick = time.time()
-                # print('\r', f'action : {action} {timeTick} ', end="")
+                pg.event.pump()
                 keyFx = keyTable[action][1]
                 fxArgs = keyTable[action][2]
                 keyFx(**fxArgs)
