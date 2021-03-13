@@ -71,9 +71,10 @@ def main():
         nonlocal action
         while True:
             # TODO comand log for ctrl+z
-            if sd.user_want_exit():
-                sd.quit()
-            for evnt in pg.event.get():
+            # if sd.user_want_exit():
+            #     sd.quit()
+            evnt = pg.event.wait(100)
+            if not evnt == pg.NOEVENT:
                 if evnt.type == pg.QUIT:
                     sd.quit()
                     # sys.exit()
@@ -88,11 +89,7 @@ def main():
                             break
             toRepeat = tickSize < (time.time() - timeTick)
             if (action and toRepeat):
-            # if action:
-                pg.event.clear()
                 pg.event.pump()
-                # timeTick = time.time()
-                # print('\r', f'action : {action} {timeTick} ', end="")
                 keyFx = keyTable[action][1]
                 fxArgs = keyTable[action][2]
                 keyFx(**fxArgs)
